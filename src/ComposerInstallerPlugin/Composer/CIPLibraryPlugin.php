@@ -5,13 +5,13 @@ namespace ComposerInstallerPlugin\Composer;
 use Composer\Composer;
 use Composer\IO\IOInterface;
 use Composer\Plugin\PluginInterface;
-use ComposerInstallerPlugin\Composer\LibraryInstaller;
+use ComposerInstallerPlugin\Composer\CIPLibraryInstaller;
 
-class LibraryPlugin implements PluginInterface
+class CIPLibraryPlugin implements PluginInterface
 {
   public function activate (Composer $composer, IOInterface $io)
   {
-    $installer = new LibraryInstaller($io, $composer);
+    $installer = new CIPLibraryInstaller($io, $composer);
     $composer->getInstallationManager()->addInstaller($installer);
   }
 }

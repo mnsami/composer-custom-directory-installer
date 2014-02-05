@@ -6,7 +6,7 @@ use Composer\Composer;
 use Composer\Package\PackageInterface;
 use Composer\Installer\PearInstaller;
 
-class PearInstaller extends PearInstaller
+class CIPPearInstaller extends PearInstaller
 {
   public function getInstallPath(PackageInterface $package)
   {

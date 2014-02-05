@@ -5,13 +5,13 @@ namespace ComposerInstallerPlugin\Composer;
 use Composer\Composer;
 use Composer\IO\IOInterface;
 use Composer\Plugin\PluginInterface;
-use ComposerInstallerPlugin\Composer\PearInstaller;
+use ComposerInstallerPlugin\Composer\CIPPearInstaller;
 
-class PearPlugin implements PluginInterface
+class CIPPearPlugin implements PluginInterface
 {
   public function activate (Composer $composer, IOInterface $io)
   {
-    $installer = new PearInstaller($io, $composer);
+    $installer = new CIPPearInstaller($io, $composer);
     $composer->getInstallationManager()->addInstaller($installer);
   }
 }

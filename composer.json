@@ -19,6 +19,6 @@
     "psr-0": {"ComposerInstallerPlugin\\Composer": "src/"}
   },
   "extra": {
-      "class": ["ComposerInstallerPlugin\\Composer\\LibraryPlugin", "ComposerInstallerPlugin\\Composer\\PearPlugin"]
+      "class": ["ComposerInstallerPlugin\\Composer\\CIPLibraryPlugin", "ComposerInstallerPlugin\\Composer\\CIPPearPlugin"]
   }
 }

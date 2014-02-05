@@ -6,7 +6,7 @@ use Composer\Composer;
 use Composer\Package\PackageInterface;
 use Composer\Installer\LibraryInstaller;
 
-class LibraryInstaller extends LibraryInstaller
+class CIPLibraryInstaller extends LibraryInstaller
 {
   public function getInstallPath(PackageInterface $package)
   {
