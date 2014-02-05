@@ -1,9 +1,9 @@
 {
-  "name": "mnabil/composer-installer-plugin",
+  "name": "composer-installer/composer-installer-plugin",
   "type": "composer-plugin",
   "description": "A composer plugin, to help install packages of different types in custom paths.",
   "license": "MIT",
-  "keywords": ["composer", "composer-plugin", "composer-installer"],
+  "keywords": ["composer", "composer-plugin", "composer-installer", "composer-plugin"],
   "authors": [
     {
       "name": "Mina Nabil Sami",

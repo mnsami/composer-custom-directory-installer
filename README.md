@@ -9,8 +9,7 @@ Usage
 First, you need to add it to your repositories section
 
 ``` json
-{
-  
+{  
   "repositories": [
     {
       "type": "vcs",
