@@ -9,32 +9,39 @@ Usage
 First, you need to add it to your repositories section
 
 ``` json
+{
+  
   "repositories": [
     {
       "type": "vcs",
       "url": "git@github.com:mnabil/composer-installer-plugin.git"
     }
   ]
+}
 ```
 
 Second, add it to your require section, here I'm taking the famous `monolog` composer pacakge to install
 
 ``` json
+{
   "require":{
     "php": ">=5.3",
     "mnabil/composer-installer-plugin": "*",
     "monolog/monolog": "*"
   }
+}
 ```
 
 Third, to instruct the plugin to install the `monolog` package in a custom directory, use the `extra` arbitrary
 
 ``` json
+{
   "extra":{
     "installer-paths":{
       "./monolog/": ["monolog/monolog"]
     }
   }
+}
 ```
 
 Putting it in the same like above, it will instruct composer to install `monolog` in monolog folder inside the directory `composer install` is ran from.
