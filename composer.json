@@ -1,0 +1,24 @@
+{
+  "name": "mnabil/composer-installer-plugin",
+  "type": "composer-plugin",
+  "description": "A composer plugin, to help install packages of different types in custom paths.",
+  "license": "MIT",
+  "keywords": ["composer", "composer-plugin", "composer-installer"],
+  "authors": [
+    {
+      "name": "Mina Nabil Sami",
+      "email": "mina.nsami@gmail.com"
+    }
+  ],
+  "minimum-stability": "stable",
+  "require": {
+    "php": ">=5.3",
+    "composer-plugin-api": "*"
+  },
+  "autoload": {
+    "psr-0": {"ComposerInstallerPlugin\\Composer": "src/"}
+  },
+  "extra": {
+      "class": ["ComposerInstallerPlugin\\Composer\\LibraryPlugin", "ComposerInstallerPlugin\\Composer\\PearPlugin"]
+  }
+}
