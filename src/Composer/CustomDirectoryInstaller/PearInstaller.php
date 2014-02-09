@@ -1,16 +1,17 @@
 <?php
 
-namespace ComposerInstallerPlugin\Composer;
+namespace Composer\CustomDirectoryInstaller;
 
-use Composer\Composer;
 use Composer\Package\PackageInterface;
-use Composer\Installer\LibraryInstaller;
+use Composer\Installer\PearInstaller as BasePearInstaller;
 
-class CIPLibraryInstaller extends LibraryInstaller
+class PearInstaller extends BasePearInstaller
 {
   public function getInstallPath(PackageInterface $package)
   {
     $names = $package->getNames();
+
+    echo "\nNames: [" . implode(" - ", $names) . "]\n\n";
 
     if ($this->composer->getPackage()) 
     {
@@ -19,6 +20,8 @@ class CIPLibraryInstaller extends LibraryInstaller
       {
         foreach($extra['installer-paths'] as $path => $packageNames)
         {
+          echo "Path: " . $path . "\n";
+          echo "package name: " . var_export($packageNames, true) . "\n";
           foreach($packageNames as $packageName)
           {
             if (in_array($packageName, $names)) {

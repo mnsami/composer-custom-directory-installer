@@ -1,17 +1,17 @@
 <?php
 
-namespace ComposerInstallerPlugin\Composer;
+namespace Composer\CustomDirectoryInstaller;
 
 use Composer\Composer;
 use Composer\IO\IOInterface;
 use Composer\Plugin\PluginInterface;
-use ComposerInstallerPlugin\Composer\CIPLibraryInstaller;
+use Composer\CustomDirectoryInstaller\LibraryInstaller;
 
-class CIPLibraryPlugin implements PluginInterface
+class LibraryPlugin implements PluginInterface
 {
   public function activate (Composer $composer, IOInterface $io)
   {
-    $installer = new CIPLibraryInstaller($io, $composer);
+    $installer = new LibraryInstaller($io, $composer);
     $composer->getInstallationManager()->addInstaller($installer);
   }
 }

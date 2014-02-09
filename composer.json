@@ -1,13 +1,15 @@
 {
-  "name": "composer-installer/composer-installer-plugin",
+  "name": "mnabil/composer-custom-directory-installer",
   "type": "composer-plugin",
   "description": "A composer plugin, to help install packages of different types in custom paths.",
   "license": "MIT",
-  "keywords": ["composer", "composer-plugin", "composer-installer", "composer-plugin"],
+  "version": "1.0",
+  "keywords": ["composer", "composer-plugin", "composer-installer"],
+  "homepage": "http://www.leaseweblabs.com",
   "authors": [
     {
       "name": "Mina Nabil Sami",
-      "email": "mina.nsami@gmail.com"
+      "email": "m.naguib@ocom.com"
     }
   ],
   "minimum-stability": "stable",
@@ -16,9 +18,9 @@
     "composer-plugin-api": "*"
   },
   "autoload": {
-    "psr-0": {"ComposerInstallerPlugin\\Composer": "src/"}
+    "psr-0": {"Composer\\CustomDirectoryInstaller": "src/"}
   },
   "extra": {
-      "class": ["ComposerInstallerPlugin\\Composer\\CIPLibraryPlugin", "ComposerInstallerPlugin\\Composer\\CIPPearPlugin"]
+      "class": ["Composer\\CustomDirectoryInstaller\\LibraryPlugin", "Composer\\CustomDirectoryInstaller\\PearPlugin"]
   }
 }
