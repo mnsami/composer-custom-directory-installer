@@ -11,8 +11,6 @@ class PearInstaller extends BasePearInstaller
   {
     $names = $package->getNames();
 
-    echo "\nNames: [" . implode(" - ", $names) . "]\n\n";
-
     if ($this->composer->getPackage()) 
     {
       $extra = $this->composer->getPackage()->getExtra();
@@ -20,8 +18,6 @@ class PearInstaller extends BasePearInstaller
       {
         foreach($extra['installer-paths'] as $path => $packageNames)
         {
-          echo "Path: " . $path . "\n";
-          echo "package name: " . var_export($packageNames, true) . "\n";
           foreach($packageNames as $packageName)
           {
             if (in_array($packageName, $names)) {
