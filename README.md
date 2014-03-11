@@ -13,7 +13,7 @@ First, you need to add it to your repositories section
   "repositories": [
     {
       "type": "vcs",
-      "url": "git@github.com:mnabil/composer-installer-plugin.git"
+      "url": "git@github.com:mnsami/composer-installer-plugin.git"
     }
   ]
 }
