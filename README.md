@@ -25,7 +25,7 @@ Second, add it to your require section, here I'm taking the famous `monolog` com
 {
   "require":{
     "php": ">=5.3",
-    "mnabil/composer-custom-directory-installer": "*",
+    "mnsami/composer-custom-directory-installer": "*",
     "monolog/monolog": "*"
   }
 }

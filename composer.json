@@ -1,5 +1,5 @@
 {
-  "name": "mnabil/composer-custom-directory-installer",
+  "name": "mnsami/composer-custom-directory-installer",
   "type": "composer-plugin",
   "description": "A composer plugin, to help install packages of different types in custom paths.",
   "license": "MIT",
@@ -9,7 +9,7 @@
   "authors": [
     {
       "name": "Mina Nabil Sami",
-      "email": "m.naguib@ocom.com"
+      "email": "m.nsami@gmail.com"
     }
   ],
   "minimum-stability": "stable",
