@@ -5,7 +5,6 @@
   "license": "MIT",
   "version": "1.0",
   "keywords": ["composer", "composer-plugin", "composer-installer"],
-  "homepage": "http://www.leaseweblabs.com",
   "authors": [
     {
       "name": "Mina Nabil Sami",
@@ -21,6 +20,9 @@
     "psr-0": {"Composer\\CustomDirectoryInstaller": "src/"}
   },
   "extra": {
-      "class": ["Composer\\CustomDirectoryInstaller\\LibraryPlugin", "Composer\\CustomDirectoryInstaller\\PearPlugin"]
+    "class": ["Composer\\CustomDirectoryInstaller\\LibraryPlugin", "Composer\\CustomDirectoryInstaller\\PearPlugin"],
+    "branch-alias": {
+      "dev-master": "1.0.2-dev"
+    }
   }
 }
