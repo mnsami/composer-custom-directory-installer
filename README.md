@@ -1,5 +1,5 @@
-composer-installer-plugin
-=========================
+composer-custom-directory-installer
+===================================
 
 A composer plugin, to install differenty types of composer packages in custom directories outside the default composer default installation path which is in the `vendor` folder.
 
@@ -13,7 +13,7 @@ First, you need to add it to your repositories section
   "repositories": [
     {
       "type": "vcs",
-      "url": "git@github.com:mnsami/composer-installer-plugin.git"
+      "url": "git@github.com:mnsami/composer-custom-directory-installer.git"
     }
   ]
 }
@@ -25,7 +25,7 @@ Second, add it to your require section, here I'm taking the famous `monolog` com
 {
   "require":{
     "php": ">=5.3",
-    "mnsami/composer-custom-directory-installer": "*",
+    "mnsami/composer-custom-directory-installer": "1.0.*",
     "monolog/monolog": "*"
   }
 }
