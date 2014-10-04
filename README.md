@@ -8,20 +8,21 @@ Installation
 
 - Include the composer plugin into your `composer.json` `require` section::
 
-
-    "require":{
-      "php": ">=5.3",
-      "mnsami/composer-custom-directory-installer": "1.0.*",
-      "monolog/monolog": "*"
-    }
+```
+  "require":{
+    "php": ">=5.3",
+    "mnsami/composer-custom-directory-installer": "1.0.*",
+    "monolog/monolog": "*"
+  }
+```
 
 - In the `extra` section define the custom directory you want to the package to be installed in::
 
-
-    "extra":{
-      "installer-paths":{
-        "./monolog/": ["monolog/monolog"]
-      }
+```
+  "extra":{
+    "installer-paths":{
+      "./monolog/": ["monolog/monolog"]
     }
+```
 
  by adding the `installer-paths` part, you are telling composer to install the `monolog` package inside the `monolog` folder in your root directory.
