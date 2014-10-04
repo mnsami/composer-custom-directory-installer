@@ -20,7 +20,7 @@ class PearInstaller extends BasePearInstaller
         {
           foreach($packageNames as $packageName)
           {
-            if (in_array($packageName, $names)) {
+            if (in_array(strtolower($packageName), $names)) {
               return $path;
             }
           }

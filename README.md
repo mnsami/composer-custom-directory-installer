@@ -3,44 +3,25 @@ composer-custom-directory-installer
 
 A composer plugin, to install differenty types of composer packages in custom directories outside the default composer default installation path which is in the `vendor` folder.
 
-Usage
-=====
+Installation
+------------
 
-First, you need to add it to your repositories section
+- Include the composer plugin into your `composer.json` `require` section::
 
-``` json
-{  
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "git@github.com:mnsami/composer-custom-directory-installer.git"
+
+    "require":{
+      "php": ">=5.3",
+      "mnsami/composer-custom-directory-installer": "1.0.*",
+      "monolog/monolog": "*"
     }
-  ]
-}
-```
 
-Second, add it to your require section, here I'm taking the famous `monolog` composer pacakge to install
+- In the `extra` section define the custom directory you want to the package to be installed in::
 
-``` json
-{
-  "require":{
-    "php": ">=5.3",
-    "mnsami/composer-custom-directory-installer": "1.0.*",
-    "monolog/monolog": "*"
-  }
-}
-```
 
-Third, to instruct the plugin to install the `monolog` package in a custom directory, use the `extra` arbitrary
-
-``` json
-{
-  "extra":{
-    "installer-paths":{
-      "./monolog/": ["monolog/monolog"]
+    "extra":{
+      "installer-paths":{
+        "./monolog/": ["monolog/monolog"]
+      }
     }
-  }
-}
-```
 
-Putting it in the same like above, it will instruct composer to install `monolog` in monolog folder inside the directory `composer install` is ran from.
+ by adding the `installer-paths` part, you are telling composer to install the `monolog` package inside the `monolog` folder in your root directory.
