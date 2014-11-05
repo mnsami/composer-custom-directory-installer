@@ -24,19 +24,48 @@ class LibraryInstaller extends BaseLibraryInstaller
           foreach($packageNames as $packageName)
           {
             if (in_array(strtolower($packageName), $names)) {
-              $nameParts = explode('/',$packageName);
-              $search = array(
-                  '{$packageName}'
-              );
-              $replace = array(
-                  $packageName
-              );
-              if(count($nameParts) >= 2)
-              {
-                  $search = array_merge($search, array('{$vendor}','{$name}'));
-                  $replace = array_merge($replace,$nameParts);
+              if($matched = preg_match_all("/\{(.*?)\}/is",$path,$matches,PREG_PATTERN_ORDER)) {
+                  $packageParts = explode('/',$packageName);
+                  foreach($matches[1] as $pattern)
+                  {
+                      $patternParts = explode('|', $pattern);
+                      $psr = false;
+                      if(count($patternParts) > 1)
+                      {
+                          if(strstr($patternParts[1],'P'))
+                          {
+                              $psr = true;
+                          }
+                      }
+                      switch($patternParts[0])
+                      {
+                          case '$package':
+                              $value = $packageName;
+                              break;
+                          case '$name':
+                              if(count($packageParts) > 1) {
+                                  $value = $packageParts[1];
+                              } else {
+                                  $value = 'undefined';
+                              }
+                              break;
+                          case '$vendor':
+                              if(count($packageParts) > 1) {
+                                  $value = $packageParts[0];
+                              } else {
+                                  $value = 'undefined';
+                              }
+                              break;
+                      }
+                      if($psr === true)
+                      {
+                          $value = ucfirst($value);
+                      }
+
+                      $path = str_replace('{' . $pattern . '}', $value, $path);
+                  }
               }
-              $path = str_replace($search, $replace, $path);
+
               return $path;
             }
           }
