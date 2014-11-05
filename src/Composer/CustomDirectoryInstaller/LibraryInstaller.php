@@ -14,7 +14,7 @@ class LibraryInstaller extends BaseLibraryInstaller
   {
     $names = $package->getNames();
 
-    if ($this->composer->getPackage()) 
+    if ($this->composer->getPackage())
     {
       $extra = $this->composer->getPackage()->getExtra();
       if(!empty($extra['installer-paths']))
@@ -24,6 +24,19 @@ class LibraryInstaller extends BaseLibraryInstaller
           foreach($packageNames as $packageName)
           {
             if (in_array(strtolower($packageName), $names)) {
+              $nameParts = explode('/',$packageName);
+              $search = array(
+                  '{$packageName}'
+              );
+              $replace = array(
+                  $packageName
+              );
+              if(count($nameParts) >= 2)
+              {
+                  $search = array_merge($search, array('{$vendor}','{$name}'));
+                  $replace = array_merge($replace,$nameParts);
+              }
+              $path = str_replace($search, $replace, $path);
               return $path;
             }
           }
