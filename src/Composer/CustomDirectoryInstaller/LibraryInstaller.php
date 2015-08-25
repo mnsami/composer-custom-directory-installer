@@ -37,4 +37,12 @@ class LibraryInstaller extends BaseLibraryInstaller
      */
     return parent::getInstallPath($package);
   }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function supports($packageType)
+  {
+      return true;
+  }
 }
