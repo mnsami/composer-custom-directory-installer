@@ -3,15 +3,16 @@
 namespace Composer\CustomDirectoryInstaller;
 
 use Composer\Package\PackageInterface;
-use Composer\Installer\PearInstaller as BasePearInstaller;
+use Composer\Installer\MetapackageInstaller as BaseMetapackageInstaller;
 
-class PearInstaller extends BasePearInstaller
+class MetapackageInstaller extends BaseMetapackageInstaller
 {
   public function getInstallPath(PackageInterface $package)
   {
     $path = PackageUtils::getPackageInstallPath($package, $this->composer);
 
-    if(!empty($path)) {
+    if(!empty($path))
+    {
         return $path;
     }
 

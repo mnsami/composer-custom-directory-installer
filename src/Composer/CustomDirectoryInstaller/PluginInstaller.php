@@ -3,9 +3,9 @@
 namespace Composer\CustomDirectoryInstaller;
 
 use Composer\Package\PackageInterface;
-use Composer\Installer\PearInstaller as BasePearInstaller;
+use Composer\Installer\PluginInstaller as BasePluginInstaller;
 
-class PearInstaller extends BasePearInstaller
+class PluginInstaller extends BasePluginInstaller
 {
   public function getInstallPath(PackageInterface $package)
   {
