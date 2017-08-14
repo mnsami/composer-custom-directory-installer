@@ -30,6 +30,7 @@ How to use
   "extra":{
     "installer-paths":{
       "./monolog/": ["monolog/monolog"]
+      }
     }
 ```
 
