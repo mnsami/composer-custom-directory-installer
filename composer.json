@@ -24,7 +24,7 @@
         "class": [
             "Composer\\CustomDirectoryInstaller\\LibraryPlugin",
             "Composer\\CustomDirectoryInstaller\\PearPlugin",
-            "Composer\\CustomDirectoryInstaller\\PluginPlugin"
+            "Composer\\CustomDirectoryInstaller\\PluginPlugin",
             "Composer\\CustomDirectoryInstaller\\ComponentPlugin"
         ],
         "branch-alias": {
