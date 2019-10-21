@@ -16,7 +16,9 @@
         "composer-plugin-api": "^1.0"
     },
     "autoload": {
-        "psr-0": {"Composer\\CustomDirectoryInstaller": "src/"}
+        "psr-4": {
+            "Composer\\CustomDirectoryInstaller\\": "src/Composer/CustomDirectoryInstaller"
+        }
     },
     "extra": {
         "class": [
