@@ -25,6 +25,7 @@
             "Composer\\CustomDirectoryInstaller\\LibraryPlugin",
             "Composer\\CustomDirectoryInstaller\\PearPlugin",
             "Composer\\CustomDirectoryInstaller\\PluginPlugin"
+            "Composer\\CustomDirectoryInstaller\\ComponentPlugin"
         ],
         "branch-alias": {
             "dev-master": "1.1.x-dev"
