@@ -3,7 +3,7 @@ composer-custom-directory-installer
 
 A composer plugin, to install differenty types of composer packages in custom directories outside the default composer default installation path which is in the `vendor` folder.
 
-This is not another `composer-installer` library for supporting non-composer package types i.e. `application` .. etc. This is only to add the flexability of installing composer packages outside the vendor folder. This package only supports `composer` package types,
+This is not another `composer-installer` library for supporting non-composer package types i.e. `application` .. etc. This is only to add the flexibility of installing composer packages outside the vendor folder. This package only supports `composer` package types,
 
 https://getcomposer.org/doc/04-schema.md#type
 
@@ -36,7 +36,7 @@ How to use
 
  by adding the `installer-paths` part, you are telling composer to install the `monolog` package inside the `monolog` folder in your root directory.
 
-- As an added new feature, we have added more flexability in defining your download directory same like the `composer/installers`, in other words you can use variables like `{$vendor}` and `{$name}` in your `installer-path` section::
+- As an added new feature, we have added more flexibility in defining your download directory same like the `composer/installers`, in other words you can use variables like `{$vendor}` and `{$name}` in your `installer-path` section::
 
 ```
   "extra": {
