@@ -3,7 +3,7 @@
   "type": "composer-plugin",
   "description": "A composer plugin, to help install packages of different types in custom paths.",
   "license": "MIT",
-  "version": "1.0",
+  "version": "1.0.1",
   "keywords": ["composer", "composer-plugin", "composer-installer"],
   "homepage": "http://www.leaseweblabs.com",
   "authors": [
