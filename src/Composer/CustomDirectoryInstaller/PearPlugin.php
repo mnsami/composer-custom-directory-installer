@@ -10,7 +10,7 @@ class PearPlugin implements PluginInterface
 {
   public function activate (Composer $composer, IOInterface $io)
   {
-    if (!class_exists('Composer\Composer\Installer\PearInstaller')) {
+    if (!class_exists('Composer\Installer\PearInstaller')) {
       return;
     }
     $installer = new PearInstaller($io, $composer);
