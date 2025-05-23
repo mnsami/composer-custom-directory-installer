@@ -9,9 +9,6 @@ composer-install:
 shell:
 	$(DOCKER) $(IMAGE) bash
 
-#test:
-#	$(DOCKER) $(IMAGE) bin/phpunit
-
 format:
 	$(DOCKER) $(IMAGE) vendor/bin/php-cs-fixer fix
 
