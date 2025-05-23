@@ -1,4 +1,4 @@
-.PHONY: composer-install shell test format build-docker-image
+.PHONY: composer-install shell format build-docker-image
 
 IMAGE = composer-custom-directory-installer
 DOCKER = docker run --rm -it -v "$(PWD)":/app -w /app
