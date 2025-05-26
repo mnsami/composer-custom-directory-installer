@@ -1,7 +1,7 @@
 composer-custom-directory-installer
 ===================================
 
-A composer plugin, to install differenty types of composer packages in custom directories outside the default composer default installation path which is in the `vendor` folder.
+A composer plugin to install different types of Composer packages in custom directories outside the default `vendor` folder.
 
 This is not another `composer-installer` library for supporting non-composer package types i.e. `application` .. etc. This is only to add the flexibility of installing composer packages outside the vendor folder. This package only supports `composer` package types,
 
