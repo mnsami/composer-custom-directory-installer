@@ -3,7 +3,7 @@
 IMAGE = composer-custom-directory-installer
 DOCKER = docker run --rm -it -v "$(CURDIR)":/app -w /app
 
-composer-install:
+composer-install: build-docker-image
 	$(DOCKER) $(IMAGE) composer install
 
 shell:

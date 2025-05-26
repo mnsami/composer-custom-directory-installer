@@ -9,3 +9,5 @@ RUN apk add --no-cache zip libzip \
     && docker-php-ext-install zip \
     && docker-php-ext-enable zip \
     && apk del --no-cache .build-deps
+
+CMD ["composer", "install"]
