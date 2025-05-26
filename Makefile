@@ -7,7 +7,7 @@ composer-install:
 	$(DOCKER) $(IMAGE) composer install
 
 shell:
-	$(DOCKER) $(IMAGE) bash
+	$(DOCKER) $(IMAGE) sh
 
 format:
 	$(DOCKER) $(IMAGE) vendor/bin/php-cs-fixer fix
