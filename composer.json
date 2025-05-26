@@ -1,6 +1,6 @@
 {
     "name": "mnsami/composer-custom-directory-installer",
-    "version": "2.0",
+    "version": "2.0.0",
     "type": "composer-plugin",
     "description": "A composer plugin, to help install packages of different types in custom paths.",
     "license": "MIT",
