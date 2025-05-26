@@ -4,8 +4,8 @@ WORKDIR /app
 
 COPY --from=composer:2.8 /usr/bin/composer /usr/bin/composer
 
-RUN apk add --no-cache zip libzip libzip-dev linux-headers \
-    --virtual .build-deps $PHPIZE_DEPS \
+RUN apk add --no-cache zip libzip \
+    --virtual .build-deps $PHPIZE_DEPS libzip-dev linux-headers \
     && docker-php-ext-install zip \
     && docker-php-ext-enable zip \
     && apk del --no-cache .build-deps
