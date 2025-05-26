@@ -16,7 +16,9 @@
         "composer-plugin-api": "^1.0 || ^2.0"
     },
     "autoload": {
-        "psr-0": {"Composer\\CustomDirectoryInstaller": "src/"}
+        "psr-4": {
+            "Composer\\CustomDirectoryInstaller\\": "src/"
+        }
     },
     "extra": {
         "class": [
@@ -27,5 +29,8 @@
         "branch-alias": {
             "dev-master": "2.0.x-dev"
         }
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.75"
     }
 }
