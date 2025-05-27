@@ -8,7 +8,7 @@ use Composer\Plugin\PluginInterface;
 
 class LibraryPlugin implements PluginInterface
 {
-  private $installer;
+  private LibraryInstaller $installer;
 
   public function activate (Composer $composer, IOInterface $io)
   {

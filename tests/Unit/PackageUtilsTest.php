@@ -1,6 +1,6 @@
 <?php
 
-namespace Composer\CustomDirectoryInstaller\Tests;
+namespace App\Tests\Unit;
 
 use Composer\CustomDirectoryInstaller\PackageUtils;
 use PHPUnit\Framework\TestCase;
