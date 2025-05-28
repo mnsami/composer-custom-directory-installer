@@ -26,15 +26,15 @@ class PackageUtils
 
         if ($composer->getPackage()) {
             $extra = $composer->getPackage()->getExtra();
-            if(!empty($extra['installer-paths'])) {
+            if (!empty($extra['installer-paths'])) {
                 $customPath = self::mapCustomInstallPaths($extra['installer-paths'], $prettyName);
-                if(false !== $customPath) {
+                if (false !== $customPath) {
                     return self::templatePath($customPath, $availableVars);
                 }
             }
         }
 
-        return NULL;
+        return null;
     }
 
     /**

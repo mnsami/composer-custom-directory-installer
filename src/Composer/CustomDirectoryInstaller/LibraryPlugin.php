@@ -8,20 +8,20 @@ use Composer\Plugin\PluginInterface;
 
 class LibraryPlugin implements PluginInterface
 {
-  private $installer;
+    private LibraryInstaller $installer;
 
-  public function activate (Composer $composer, IOInterface $io)
-  {
-    $this->installer = new LibraryInstaller($io, $composer);
-    $composer->getInstallationManager()->addInstaller($this->installer);
-  }
+    public function activate(Composer $composer, IOInterface $io)
+    {
+        $this->installer = new LibraryInstaller($io, $composer);
+        $composer->getInstallationManager()->addInstaller($this->installer);
+    }
 
-  public function deactivate(Composer $composer, IOInterface $io)
-  {
-    $composer->getInstallationManager()->removeInstaller($this->installer);
-  }
+    public function deactivate(Composer $composer, IOInterface $io)
+    {
+        $composer->getInstallationManager()->removeInstaller($this->installer);
+    }
 
-  public function uninstall(Composer $composer, IOInterface $io)
-  {
-  }
+    public function uninstall(Composer $composer, IOInterface $io)
+    {
+    }
 }

@@ -10,7 +10,7 @@ shell:
 	$(DOCKER) $(IMAGE) sh
 
 format:
-	$(DOCKER) $(IMAGE) vendor/bin/php-cs-fixer fix
+	$(DOCKER) $(IMAGE) vendor/bin/php-cs-fixer fix src
 
 
 build-docker-image:

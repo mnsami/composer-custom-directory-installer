@@ -12,7 +12,7 @@ class LibraryInstaller extends BaseLibraryInstaller
     {
         $path = PackageUtils::getPackageInstallPath($package, $this->composer);
 
-        if(!empty($path)) {
+        if (!empty($path)) {
             return $path;
         }
 
