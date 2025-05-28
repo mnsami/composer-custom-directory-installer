@@ -34,7 +34,7 @@ class PackageUtils
             }
         }
 
-        return NULL;
+        return null;
     }
 
     /**
