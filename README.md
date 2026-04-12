@@ -1,9 +1,9 @@
 composer-custom-directory-installer
 ===================================
 
-A composer plugin to install different types of Composer packages in custom directories outside the default `vendor` folder.
+A Composer plugin to install packages in custom directories outside the default `vendor` folder.
 
-This is not another `composer-installer` library for supporting non-composer package types i.e. `application` .. etc. This is only to add the flexibility of installing composer packages outside the vendor folder. This package only supports `composer` package types,
+This is not another `composer-installer` library for supporting non-composer package types such as `application`. It only adds flexibility for installing standard `composer` package types in custom paths.
 
 https://getcomposer.org/doc/04-schema.md#type
 
@@ -17,101 +17,160 @@ Requirements
 - PHP >= 8.1
 - Composer 2.x
 
-How to use
-----------
+Installation
+------------
 
-- Include the composer plugin into your `composer.json` `require` section:
+Add the plugin to the `require` section of your `composer.json`:
 
 ```json
 "require": {
-  "php": ">=8.1",
-  "mnsami/composer-custom-directory-installer": "2.*",
-  "monolog/monolog": "*"
+    "mnsami/composer-custom-directory-installer": "^2.1"
 }
 ```
 
-- In the `extra` section define the custom directory you want the package to be installed in:
+**Important — Composer 2.2+ plugin trust:**  
+Composer 2.2 and later require you to explicitly allow third-party plugins. Add the following to your `composer.json`:
+
+```json
+"config": {
+    "allow-plugins": {
+        "mnsami/composer-custom-directory-installer": true
+    }
+}
+```
+
+Without this, Composer will either prompt interactively or block the plugin entirely in non-interactive (CI) environments.
+
+How to use
+----------
+
+In the `extra` section of your root `composer.json`, define the custom directory for each package:
 
 ```json
 "extra": {
-  "installer-paths": {
-    "./monolog/": ["monolog/monolog"]
-  }
+    "installer-paths": {
+        "./monolog/": ["monolog/monolog"]
+    }
 }
 ```
 
-By adding the `installer-paths` part, you are telling composer to install the `monolog` package inside the `monolog` folder in your root directory.
+This tells Composer to install `monolog/monolog` into the `./monolog/` directory instead of `vendor/monolog/monolog`.
 
 Path Variables
 --------------
 
 You can use the following variables in your `installer-paths` to build dynamic paths:
 
-| Variable    | Description                                      | Example value      |
-|-------------|--------------------------------------------------|--------------------|
-| `{$vendor}` | The vendor portion of the package name           | `monolog`          |
-| `{$name}`   | The package name (or `installer-name` override)  | `monolog`          |
-| `{$type}`   | The Composer package type                        | `library`          |
+| Variable    | Description                                     | Example value      |
+|-------------|-------------------------------------------------|--------------------|
+| `{$vendor}` | The vendor portion of the package name          | `monolog`          |
+| `{$name}`   | The package name (or `installer-name` override) | `monolog`          |
+| `{$type}`   | The Composer package type                       | `library`          |
 
 ```json
 "extra": {
-  "installer-paths": {
-    "./customlibs/{$vendor}/db/{$name}": ["doctrine/orm"],
-    "./custom/{$type}/{$vendor}/{$name}": ["acme/*"]
-  }
+    "installer-paths": {
+        "./customlibs/{$vendor}/db/{$name}": ["doctrine/orm"],
+        "./custom/{$type}/{$vendor}/{$name}": ["acme/*"]
+    }
 }
 ```
 
 Matching Strategies
 -------------------
 
-The `installer-paths` configuration supports three matching strategies, applied in order of precedence:
+`installer-paths` supports three matching strategies, evaluated in order of precedence:
 
 ### 1. Exact package name (highest precedence)
 
+Matches one specific package:
+
 ```json
 "installer-paths": {
-  "./libs/monolog/": ["monolog/monolog"]
+    "./libs/monolog/": ["monolog/monolog"]
 }
 ```
 
 ### 2. Package type prefix
 
-Match all packages of a given Composer type using the `type:` prefix:
+Matches all packages of a given Composer type using the `type:` prefix:
 
 ```json
 "installer-paths": {
-  "./wp-content/plugins/{$name}/": ["type:wordpress-plugin"]
+    "./wp-content/plugins/{$name}/": ["type:wordpress-plugin"]
 }
 ```
 
 ### 3. Wildcard vendor glob (lowest precedence)
 
-Match all packages from a vendor using `*`:
+Matches all packages from a given vendor using `*`:
 
 ```json
 "installer-paths": {
-  "./acme-libs/{$name}/": ["acme/*"]
+    "./acme-libs/{$name}/": ["acme/*"]
 }
 ```
 
 Custom `installer-name`
 -----------------------
 
-You can override the `{$name}` variable for a specific package by setting `installer-name` in its `extra` section:
+A package can override the `{$name}` variable by setting `installer-name` in its own `extra` section (inside the *package's* `composer.json`, not the root project):
 
 ```json
 "extra": {
-  "installer-name": "my-custom-name"
+    "installer-name": "my-custom-name"
+}
+```
+
+When set, `{$name}` in the path template will resolve to `my-custom-name` instead of the package's actual name.
+
+Complete example
+----------------
+
+```json
+{
+    "require": {
+        "mnsami/composer-custom-directory-installer": "^2.1",
+        "monolog/monolog": "*",
+        "acme/foo": "*",
+        "acme/bar": "*"
+    },
+    "config": {
+        "allow-plugins": {
+            "mnsami/composer-custom-directory-installer": true
+        }
+    },
+    "extra": {
+        "installer-paths": {
+            "./logger/":              ["monolog/monolog"],
+            "./acme/{$name}/":        ["acme/*"],
+            "./plugins/{$name}/":     ["type:wordpress-plugin"]
+        }
+    }
 }
 ```
 
 Security
 --------
 
-Resolved install paths are validated to prevent directory traversal attacks. A path containing `..` will throw an `InvalidArgumentException`.
+Resolved install paths are validated to prevent directory traversal attacks. A path resolving to a value that contains `..` will throw an `InvalidArgumentException`.
+
+Upgrading from v1.x
+--------------------
+
+| | v1.x | v2.x |
+|---|---|---|
+| PHP | >= 5.3 | >= 8.1 |
+| Composer | 1.x / 2.x | 2.x only |
+| Require string | `"1.*"` | `"^2.1"` |
+| `type:` matching | No | Yes |
+| Wildcard `vendor/*` | No | Yes |
+| `{$type}` variable | No | Yes |
+| `allow-plugins` needed | No | Yes (Composer 2.2+) |
+
+Existing `installer-paths` configurations (exact package names) are fully backwards-compatible and require no changes.
 
 Note
 ----
 
-Composer `type: project` is not supported in this installer, as packages with type `project` only make sense to be used with application shells like `symfony/framework-standard-edition`, to be required by another package.
+Composer `type: project` is not supported by this installer, as packages with type `project` only make sense to be used with application shells like `symfony/framework-standard-edition`.
