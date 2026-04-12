@@ -14,7 +14,7 @@ https://getcomposer.org/doc/04-schema.md#type
 Requirements
 ------------
 
-- PHP >= 8.0
+- PHP >= 8.1
 - Composer 2.x
 
 How to use
@@ -24,7 +24,7 @@ How to use
 
 ```json
 "require": {
-  "php": ">=8.0",
+  "php": ">=8.1",
   "mnsami/composer-custom-directory-installer": "2.*",
   "monolog/monolog": "*"
 }
