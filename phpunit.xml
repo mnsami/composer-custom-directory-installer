@@ -2,8 +2,13 @@
 <phpunit bootstrap="vendor/autoload.php"
          colors="true">
     <testsuites>
-        <testsuite name="PackageUtils Test Suite">
+        <testsuite name="Custom Directory Installer Test Suite">
             <directory>tests</directory>
         </testsuite>
     </testsuites>
+    <source>
+        <include>
+            <directory suffix=".php">src</directory>
+        </include>
+    </source>
 </phpunit>

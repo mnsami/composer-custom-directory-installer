@@ -1,15 +1,21 @@
 name: CI
 
 on:
+  push:
+    branches:
+      - master
   pull_request:
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['8.1', '8.2', '8.3']
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: php-actions/composer@v6
         with:
-          php_version: '8.3'
+          php_version: ${{ matrix.php }}
       - run: vendor/bin/phpunit
-      - run: vendor/bin/php-cs-fixer fix src --dry-run --diff
+      - run: vendor/bin/php-cs-fixer fix src --dry-run --diff --config .php-cs-fixer.dist.php
