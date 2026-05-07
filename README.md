@@ -5,6 +5,32 @@ A Composer plugin to install packages in custom directories outside the default 
 
 This is not another `composer-installer` library for supporting non-composer package types such as `application`. By default it handles `library`-type packages, but you can extend it to any Composer package type via `extra.installer-types` in your root `composer.json`.
 
+Table of Contents
+-----------------
+
+- [Why this plugin?](#why-this-plugin)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [How to use](#how-to-use)
+- [Path Variables](#path-variables)
+  - [Path Variable Flags](#path-variable-flags)
+- [Matching Strategies](#matching-strategies)
+  - [Exact package name](#1-exact-package-name-highest-precedence)
+  - [Package type prefix](#2-package-type-prefix)
+  - [Wildcard vendor glob](#3-wildcard-vendor-glob-lowest-precedence)
+- [Custom `installer-name`](#custom-installer-name)
+- [Supporting Custom Package Types](#supporting-custom-package-types)
+- [Complete example](#complete-example)
+- [Real-world use cases](#real-world-use-cases)
+  - [WordPress with WPackagist](#wordpress-with-wpackagist)
+  - [Docker / keeping vendor outside the web root](#docker--keeping-vendor-outside-the-web-root)
+  - [Monorepos with sibling library directories](#monorepos-with-sibling-library-directories)
+  - [PascalCase or namespaced paths](#pascalcase-or-namespaced-paths)
+- [Migrating from oomphinc/composer-installers-extender](#migrating-from-oomphinccomposer-installers-extender)
+- [Security](#security)
+- [Upgrading from v1.x](#upgrading-from-v1x)
+- [Note](#note)
+
 https://getcomposer.org/doc/04-schema.md#type
 
 > The type of the package. It defaults to library.
