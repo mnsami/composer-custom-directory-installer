@@ -36,7 +36,15 @@ Available Makefile targets: `composer-install`, `format`, `shell`, `build-docker
 
 The Docker image emits a `PHP Startup: Unable to load dynamic library 'zip'` warning on every run — this is harmless, the project doesn't use the zip extension.
 
-The Docker image must be built first (`make composer-install` does this). If `composer.json` `require-dev` changes, run `docker run --rm -v "$(pwd)":/app -w /app composer-custom-directory-installer composer update` — the lock file must include dev deps or Composer classes won't load in tests.
+The Docker image must be built first (`make composer-install` does this). Note: `make composer-install` requires an interactive TTY — in non-interactive contexts (CI, Claude Code) use the direct commands instead:
+
+```bash
+# Install dependencies via Docker (no TTY required)
+docker run --rm -v "$(pwd)":/app -w /app composer-custom-directory-installer composer install
+
+# If require-dev changes, update the lock file (Composer classes won't load in tests otherwise)
+docker run --rm -v "$(pwd)":/app -w /app composer-custom-directory-installer composer update
+```
 
 ## Architecture
 
