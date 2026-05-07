@@ -65,6 +65,6 @@ class LibraryPluginTest extends TestCase
             $this->createMock(Composer::class),
             $this->createMock(IOInterface::class)
         );
-        $this->assertTrue(true);
+        $this->expectNotToPerformAssertions();
     }
 }

@@ -29,14 +29,10 @@ class PearInstaller extends BasePearInstaller
     {
         $path = PackageUtils::getPackageInstallPath($package, $this->composer);
 
-        if (!empty($path)) {
+        if ($path !== null) {
             return $path;
         }
 
-        /*
-         * In case, the user didn't provide a custom path
-         * use the default one, by calling the parent::getInstallPath function
-         */
         return parent::getInstallPath($package);
     }
 }

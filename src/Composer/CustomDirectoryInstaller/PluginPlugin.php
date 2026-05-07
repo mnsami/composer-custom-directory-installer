@@ -14,7 +14,7 @@ use Composer\Plugin\PluginInterface;
  */
 class PluginPlugin implements PluginInterface
 {
-    private PluginInstaller $installer;
+    private ?PluginInstaller $installer = null;
 
     /**
      * Activates the plugin by registering the PluginInstaller.
@@ -38,7 +38,9 @@ class PluginPlugin implements PluginInterface
      */
     public function deactivate(Composer $composer, IOInterface $io): void
     {
-        $composer->getInstallationManager()->removeInstaller($this->installer);
+        if ($this->installer !== null) {
+            $composer->getInstallationManager()->removeInstaller($this->installer);
+        }
     }
 
     /**

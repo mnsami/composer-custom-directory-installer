@@ -142,6 +142,28 @@ class PackageUtilsTest extends TestCase
         $this->assertSame('exact-path', $result);
     }
 
+    public function testMapCustomInstallPathsExactNameWinsOverWildcardInEarlierEntry(): void
+    {
+        // Wildcard entry listed first — exact match in a later entry must still win.
+        $paths = [
+            'wildcard-path' => ['acme/*'],
+            'exact-path' => ['acme/mylib'],
+        ];
+        $result = $this->callProtected('mapCustomInstallPaths', [$paths, 'acme/mylib', '']);
+        $this->assertSame('exact-path', $result);
+    }
+
+    public function testMapCustomInstallPathsTypeMatchWinsOverWildcardInEarlierEntry(): void
+    {
+        // Wildcard entry listed first — type match in a later entry must still win.
+        $paths = [
+            'wildcard-path' => ['acme/*'],
+            'type-path' => ['type:library'],
+        ];
+        $result = $this->callProtected('mapCustomInstallPaths', [$paths, 'acme/mylib', 'library']);
+        $this->assertSame('type-path', $result);
+    }
+
     public function testMapCustomInstallPathsEmptyPathsReturnsFalse(): void
     {
         $result = $this->callProtected('mapCustomInstallPaths', [[], 'acme/mylib', '']);
@@ -234,5 +256,39 @@ class PackageUtilsTest extends TestCase
         $composer = $this->makeComposer(['installer-paths' => ['custom/{$vendor}/{$name}' => ['acme/../../etc/passwd']]]);
 
         PackageUtils::getPackageInstallPath($package, $composer);
+    }
+
+    public function testGetPackageInstallPathThrowsOnPathTraversalViaInstallerName(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage("contains '..'");
+
+        // installer-name override injects traversal into the resolved path
+        $package = $this->makePackage('acme/mylib', ['installer-name' => '../../etc/passwd']);
+        $composer = $this->makeComposer(['installer-paths' => ['custom/{$name}' => ['acme/mylib']]]);
+
+        PackageUtils::getPackageInstallPath($package, $composer);
+    }
+
+    public function testGetPackageInstallPathThrowsOnAbsolutePathViaInstallerName(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage("must be a relative path");
+
+        // installer-name override produces an absolute resolved path with no ".."
+        $package = $this->makePackage('acme/mylib', ['installer-name' => '/etc/passwd']);
+        $composer = $this->makeComposer(['installer-paths' => ['{$name}' => ['acme/mylib']]]);
+
+        PackageUtils::getPackageInstallPath($package, $composer);
+    }
+
+    public function testGetPackageInstallPathIgnoresMalformedInstallerPathsScalarValue(): void
+    {
+        // installer-paths value is a string instead of an array — must not throw TypeError
+        $package = $this->makePackage('acme/mylib');
+        $composer = $this->makeComposer(['installer-paths' => ['custom/{$name}' => 'acme/mylib']]);
+
+        $result = PackageUtils::getPackageInstallPath($package, $composer);
+        $this->assertNull($result);
     }
 }

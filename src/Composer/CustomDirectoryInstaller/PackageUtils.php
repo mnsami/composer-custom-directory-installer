@@ -25,17 +25,19 @@ class PackageUtils
      *  - Package type prefix: "type:library"
      *  - Wildcard glob:       "vendor/*"
      *
+     * Precedence is enforced globally across all installer-paths entries, not per-entry.
+     *
      * Supported path variables: {$vendor}, {$name}, {$type}
      *
      * @param PackageInterface $package  The package being installed.
      * @param Composer         $composer The Composer instance (used to read root extra).
      * @return string|null The resolved install path, or null if no match found.
-     * @throws \InvalidArgumentException If the resolved path contains '..'.
+     * @throws \InvalidArgumentException If the resolved path contains '..' or is absolute.
      */
     public static function getPackageInstallPath(PackageInterface $package, Composer $composer): ?string
     {
         $prettyName = $package->getPrettyName();
-        if (strpos($prettyName, '/') !== false) {
+        if (str_contains($prettyName, '/')) {
             [$vendor, $name] = explode('/', $prettyName);
         } else {
             $vendor = '';
@@ -51,9 +53,10 @@ class PackageUtils
         }
 
         $extra = $composer->getPackage()->getExtra();
-        if (!empty($extra['installer-paths'])) {
+        if (!empty($extra['installer-paths']) && is_array($extra['installer-paths'])) {
+            $paths = array_filter($extra['installer-paths'], 'is_array');
             $customPath = self::mapCustomInstallPaths(
-                $extra['installer-paths'],
+                $paths,
                 $prettyName,
                 $package->getType()
             );
@@ -64,6 +67,15 @@ class PackageUtils
                     throw new \InvalidArgumentException(
                         sprintf(
                             "Resolved install path '%s' contains '..', which is not allowed.",
+                            $resolvedPath
+                        )
+                    );
+                }
+
+                if (str_starts_with($resolvedPath, '/') || preg_match('/^[A-Za-z]:[\\/\\\\]/', $resolvedPath)) {
+                    throw new \InvalidArgumentException(
+                        sprintf(
+                            "Resolved install path '%s' must be a relative path.",
                             $resolvedPath
                         )
                     );
@@ -87,13 +99,12 @@ class PackageUtils
      */
     protected static function templatePath(string $path, array $vars = []): string
     {
-        if (strpos($path, '{') !== false) {
-            preg_match_all('@\{\$([A-Za-z0-9_]*)\}@i', $path, $matches);
-            if (!empty($matches[1])) {
-                foreach ($matches[1] as $var) {
-                    $path = str_replace('{$' . $var . '}', $vars[$var] ?? '', $path);
-                }
-            }
+        if (str_contains($path, '{')) {
+            $path = (string) preg_replace_callback(
+                '@\{\$([A-Za-z0-9_]+)\}@',
+                static fn(array $m): string => $vars[$m[1]] ?? '',
+                $path
+            );
         }
 
         return $path;
@@ -102,7 +113,7 @@ class PackageUtils
     /**
      * Search through installer-paths config for a path matching the given package name/type.
      *
-     * Matching precedence (highest to lowest):
+     * Matching precedence (highest to lowest), enforced globally across all entries:
      *  1. Exact package name match (e.g. "vendor/name")
      *  2. Package type prefix match (e.g. "type:library")
      *  3. Wildcard glob match (e.g. "vendor/*")
@@ -114,18 +125,24 @@ class PackageUtils
      */
     protected static function mapCustomInstallPaths(array $paths, string $name, string $type = ''): string|false
     {
+        // Pass 1: exact name match (highest precedence across all entries)
         foreach ($paths as $path => $names) {
-            // 1. Exact name match
             if (in_array($name, $names)) {
                 return $path;
             }
+        }
 
-            // 2. Type-based match (e.g. "type:wordpress-plugin")
-            if (!empty($type) && in_array('type:' . $type, $names)) {
-                return $path;
+        // Pass 2: type-prefix match
+        if (!empty($type)) {
+            foreach ($paths as $path => $names) {
+                if (in_array('type:' . $type, $names)) {
+                    return $path;
+                }
             }
+        }
 
-            // 3. Wildcard glob match (e.g. "vendor/*")
+        // Pass 3: wildcard glob match (lowest precedence)
+        foreach ($paths as $path => $names) {
             foreach ($names as $pattern) {
                 if (str_contains($pattern, '*') && fnmatch($pattern, $name)) {
                     return $path;
