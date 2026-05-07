@@ -3,7 +3,7 @@ composer-custom-directory-installer
 
 A Composer plugin to install packages in custom directories outside the default `vendor` folder.
 
-This is not another `composer-installer` library for supporting non-composer package types such as `application`. It only adds flexibility for installing standard `composer` package types in custom paths.
+This is not another `composer-installer` library for supporting non-composer package types such as `application`. By default it handles `library`-type packages, but you can extend it to any Composer package type via `extra.installer-types` in your root `composer.json`.
 
 https://getcomposer.org/doc/04-schema.md#type
 
@@ -161,6 +161,23 @@ A package can override the `{$name}` variable by setting `installer-name` in its
 
 When set, `{$name}` in the path template will resolve to `my-custom-name` instead of the package's actual name.
 
+Supporting Custom Package Types
+--------------------------------
+
+By default the plugin only handles the `library` package type. To install packages of other types (e.g. `drupal-module`, `wordpress-plugin`) into custom directories, declare those types in `extra.installer-types`:
+
+```json
+"extra": {
+    "installer-types": ["drupal-module", "wordpress-plugin"],
+    "installer-paths": {
+        "web/modules/{$name}/": ["type:drupal-module"],
+        "wp-content/plugins/{$name}/": ["type:wordpress-plugin"]
+    }
+}
+```
+
+The plugin will claim any package whose type appears in `installer-types` and apply the matching `installer-paths` rule. Without this list, packages of non-`library` types are left to Composer's default installer.
+
 Complete example
 ----------------
 
@@ -178,6 +195,7 @@ Complete example
         }
     },
     "extra": {
+        "installer-types": ["wordpress-plugin"],
         "installer-paths": {
             "./logger/":              ["monolog/monolog"],
             "./acme/{$name}/":        ["acme/*"],
@@ -209,6 +227,7 @@ Upgrading from v1.x
 | Wildcard `vendor/*` | No | Yes |
 | `{$type}` variable | No | Yes |
 | `allow-plugins` needed | No | Yes (Composer 2.2+) |
+| `installer-types` support | No | Yes |
 | Path variable flags (`\|F`, `\|P`, `\|U`) | No | Yes |
 
 Existing `installer-paths` configurations (exact package names) are fully backwards-compatible and require no changes.
