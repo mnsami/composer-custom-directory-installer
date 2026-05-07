@@ -79,7 +79,7 @@ You can use the following variables in your `installer-paths` to build dynamic p
 Matching Strategies
 -------------------
 
-`installer-paths` supports three matching strategies, evaluated in order of precedence:
+`installer-paths` supports three matching strategies. Precedence is evaluated **globally across all entries**: all entries are first scanned for an exact name match, then for a type match, then for a wildcard match. An exact match in a later-listed entry always wins over a wildcard match in an earlier-listed entry.
 
 ### 1. Exact package name (highest precedence)
 
@@ -153,7 +153,12 @@ Complete example
 Security
 --------
 
-Resolved install paths are validated to prevent directory traversal attacks. A path resolving to a value that contains `..` will throw an `InvalidArgumentException`.
+Resolved install paths are validated against two attack vectors:
+
+- **Directory traversal** — a resolved path containing `..` throws an `InvalidArgumentException`.
+- **Absolute path injection** — a resolved path that is absolute (starting with `/` or a Windows drive letter) throws an `InvalidArgumentException`. This can occur when a package's `installer-name` is set to an absolute path value.
+
+Both checks apply after all `{$variable}` substitutions are complete.
 
 Upgrading from v1.x
 --------------------

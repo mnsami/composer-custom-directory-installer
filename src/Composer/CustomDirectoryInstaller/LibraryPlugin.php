@@ -14,7 +14,7 @@ use Composer\Plugin\PluginInterface;
  */
 class LibraryPlugin implements PluginInterface
 {
-    private LibraryInstaller $installer;
+    private ?LibraryInstaller $installer = null;
 
     /**
      * Activates the plugin by registering the LibraryInstaller.
@@ -38,7 +38,9 @@ class LibraryPlugin implements PluginInterface
      */
     public function deactivate(Composer $composer, IOInterface $io): void
     {
-        $composer->getInstallationManager()->removeInstaller($this->installer);
+        if ($this->installer !== null) {
+            $composer->getInstallationManager()->removeInstaller($this->installer);
+        }
     }
 
     /**
