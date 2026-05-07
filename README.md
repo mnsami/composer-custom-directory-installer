@@ -67,6 +67,15 @@ You can use the following variables in your `installer-paths` to build dynamic p
 | `{$name}`   | The package name (or `installer-name` override) | `monolog`          |
 | `{$type}`   | The Composer package type                       | `library`          |
 
+```json
+"extra": {
+    "installer-paths": {
+        "./customlibs/{$vendor}/db/{$name}": ["doctrine/orm"],
+        "./custom/{$type}/{$vendor}/{$name}": ["acme/*"]
+    }
+}
+```
+
 ### Path Variable Flags
 
 You can append transformation flags after a pipe (`|`) to modify how a variable is substituted:
@@ -103,15 +112,6 @@ Flags can be combined. `FP` together produces **PascalCase** (capitalize first +
 ```
 
 For a package `acme/my-package` (type `library`), this resolves to `src/ACME/MyPackage/`.
-
-```json
-"extra": {
-    "installer-paths": {
-        "./customlibs/{$vendor}/db/{$name}": ["doctrine/orm"],
-        "./custom/{$type}/{$vendor}/{$name}": ["acme/*"]
-    }
-}
-```
 
 Matching Strategies
 -------------------

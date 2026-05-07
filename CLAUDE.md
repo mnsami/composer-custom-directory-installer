@@ -48,7 +48,7 @@ Each pair follows the same pattern: the Plugin implements `PluginInterface`, ins
 
 | Plugin | Installer | Handles |
 |---|---|---|
-| `LibraryPlugin` | `LibraryInstaller` | `library` type (default) |
+| `LibraryPlugin` | `LibraryInstaller` | `library` type (default); also any type listed in root `extra.installer-types` via `supports()` override |
 | `PearPlugin` | `PearInstaller` | `pear-library` type (deprecated in Composer 2.x) |
 | `PluginPlugin` | `PluginInstaller` | `composer-plugin` type |
 
@@ -63,7 +63,7 @@ All path logic lives in `PackageUtils::getPackageInstallPath()`. The flow:
    - Pass 1: Exact name match (`"vendor/name"`) — scans all entries first
    - Pass 2: Type prefix match (`"type:library"`) — scans all entries
    - Pass 3: Wildcard glob match (`"vendor/*"`) — scans all entries last
-5. Substitute `{$...}` variables with `templatePath()`.
+5. Substitute `{$...}` variables with `templatePath()`; if a placeholder has a `|flags` suffix (e.g. `{$name|FP}`), apply transformations via `applyFlags()` — `F` = ucfirst, `P` = strip separators + camelCase, `U` = strtoupper. Unknown flags are silently ignored.
 6. Reject resolved paths containing `..` (traversal guard) or starting with `/` or a drive letter (absolute path guard).
 
 ### Namespace
@@ -83,3 +83,7 @@ Tests live in `tests/Unit/` — one file per source class. Protected/private met
 **`PearPlugin` is always a no-op in Composer 2.x.** `Composer\Installer\PearInstaller` was removed in Composer 2.x. `PearPlugin::activate()` checks `class_exists()` and skips registration if the class is absent, so PEAR tests are always skipped in the dev environment. `$installer` is nullable (`?PearInstaller = null`) and `deactivate()` guards against it being null.
 
 **`failOnDeprecation` is enabled in `phpunit.xml`.** The test suite fails on any PHP deprecation notice, including those from Composer internals. New code that calls deprecated Composer API methods will break CI even if logic is correct.
+
+**`installer-types` is required for non-`library` types to be claimed.** A `type:` pattern in `installer-paths` alone is not enough — the type must also appear in `extra.installer-types` for `LibraryInstaller::supports()` to claim it. Without the list entry, Composer never asks the plugin to install that package at all.
+
+**Unknown path flags are silently ignored.** `{$name|XZ}` where `X` and `Z` are unrecognised flag characters passes through with the raw value unchanged — no error, no transformation. Typos in flag strings fail silently.
