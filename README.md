@@ -67,6 +67,43 @@ You can use the following variables in your `installer-paths` to build dynamic p
 | `{$name}`   | The package name (or `installer-name` override) | `monolog`          |
 | `{$type}`   | The Composer package type                       | `library`          |
 
+### Path Variable Flags
+
+You can append transformation flags after a pipe (`|`) to modify how a variable is substituted:
+
+```
+{$token|flags}
+```
+
+Flags are applied **left-to-right** in the order given:
+
+| Flag | Transformation | Example input | Example output |
+|------|----------------|---------------|----------------|
+| `F`  | Capitalize first letter (`ucfirst`) | `my-package` | `My-package` |
+| `P`  | Strip hyphens/underscores and capitalize each following word | `my-package` | `myPackage` |
+| `U`  | Uppercase all characters | `my-package` | `MY-PACKAGE` |
+
+Flags can be combined. `FP` together produces **PascalCase** (capitalize first + strip separators):
+
+| Expression | Input | Output |
+|------------|-------|--------|
+| `{$name\|F}` | `my-package` | `My-package` |
+| `{$name\|P}` | `my-package` | `myPackage` |
+| `{$name\|FP}` | `my-package` | `MyPackage` |
+| `{$name\|U}` | `my-package` | `MY-PACKAGE` |
+| `{$vendor\|U}` | `acme` | `ACME` |
+
+**Example:**
+
+```json
+"installer-paths": {
+    "src/{$vendor|U}/{$name|FP}/": ["acme/my-package"],
+    "modules/{$name|FP}/":         ["type:drupal-module"]
+}
+```
+
+For a package `acme/my-package` (type `library`), this resolves to `src/ACME/MyPackage/`.
+
 ```json
 "extra": {
     "installer-paths": {
@@ -191,6 +228,7 @@ Upgrading from v1.x
 | `{$type}` variable | No | Yes |
 | `allow-plugins` needed | No | Yes (Composer 2.2+) |
 | `installer-types` support | No | Yes |
+| Path variable flags (`\|F`, `\|P`, `\|U`) | No | Yes |
 
 Existing `installer-paths` configurations (exact package names) are fully backwards-compatible and require no changes.
 
