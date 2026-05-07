@@ -89,11 +89,12 @@ class PackageUtils
     }
 
     /**
-     * Replace {$var} placeholders in a path string.
+     * Replace {$var} and {$var|flags} placeholders in a path string.
      *
      * Unknown placeholders are substituted with an empty string.
+     * Optional pipe-separated flags transform the substituted value (see applyFlags()).
      *
-     * @param  string               $path The path template, e.g. "lib/{$vendor}/{$name}".
+     * @param  string               $path The path template, e.g. "lib/{$vendor}/{$name|FP}".
      * @param  array<string,string> $vars Map of variable name to replacement value.
      * @return string The path with all known placeholders substituted.
      */
@@ -101,13 +102,55 @@ class PackageUtils
     {
         if (str_contains($path, '{')) {
             $path = (string) preg_replace_callback(
-                '@\{\$([A-Za-z0-9_]+)\}@',
-                static fn(array $m): string => $vars[$m[1]] ?? '',
+                '@\{\$([A-Za-z0-9_]+)(?:\|([A-Za-z]*))?\}@',
+                static function (array $m) use ($vars): string {
+                    $value = $vars[$m[1]] ?? '';
+                    if (isset($m[2]) && $m[2] !== '') {
+                        $value = self::applyFlags($value, $m[2]);
+                    }
+
+                    return $value;
+                },
                 $path
             );
         }
 
         return $path;
+    }
+
+    /**
+     * Apply formatting flags to a string value.
+     *
+     * Flags are applied left-to-right:
+     *  F — ucfirst: capitalize first letter
+     *  P — pascal/camel: strip hyphens and underscores, capitalize each following word segment
+     *  U — strtoupper: uppercase all characters
+     *
+     * Unknown flags are silently ignored.
+     *
+     * @param  string $value The value to transform.
+     * @param  string $flags One or more flag characters (e.g. "FP", "U").
+     * @return string The transformed value.
+     */
+    protected static function applyFlags(string $value, string $flags): string
+    {
+        $len = strlen($flags);
+        for ($i = 0; $i < $len; $i++) {
+            switch ($flags[$i]) {
+                case 'F':
+                    $value = ucfirst($value);
+                    break;
+                case 'P':
+                    $parts = preg_split('/[-_]+/', $value) ?: [$value];
+                    $value = $parts[0] . implode('', array_map('ucfirst', array_slice($parts, 1)));
+                    break;
+                case 'U':
+                    $value = strtoupper($value);
+                    break;
+            }
+        }
+
+        return $value;
     }
 
     /**

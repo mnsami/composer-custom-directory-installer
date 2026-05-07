@@ -87,6 +87,62 @@ class PackageUtilsTest extends TestCase
         $this->assertSame('/', $result);
     }
 
+    // templatePath() — flags
+
+    public function testTemplatePathFlagFCapitalizesFirstLetter(): void
+    {
+        $result = $this->callProtected('templatePath', ['{$name|F}', ['name' => 'my-package']]);
+        $this->assertSame('My-package', $result);
+    }
+
+    public function testTemplatePathFlagPRemovesSeparatorsAndCamelCases(): void
+    {
+        $result = $this->callProtected('templatePath', ['{$name|P}', ['name' => 'my-package']]);
+        $this->assertSame('myPackage', $result);
+    }
+
+    public function testTemplatePathFlagPRemovesUnderscores(): void
+    {
+        $result = $this->callProtected('templatePath', ['{$name|P}', ['name' => 'my_package']]);
+        $this->assertSame('myPackage', $result);
+    }
+
+    public function testTemplatePathFlagUUppercasesAll(): void
+    {
+        $result = $this->callProtected('templatePath', ['{$name|U}', ['name' => 'my-package']]);
+        $this->assertSame('MY-PACKAGE', $result);
+    }
+
+    public function testTemplatePathFlagFPProducesPascalCase(): void
+    {
+        $result = $this->callProtected('templatePath', ['{$name|FP}', ['name' => 'my-package']]);
+        $this->assertSame('MyPackage', $result);
+    }
+
+    public function testTemplatePathFlagFPOnSingleWord(): void
+    {
+        $result = $this->callProtected('templatePath', ['{$name|FP}', ['name' => 'mypackage']]);
+        $this->assertSame('Mypackage', $result);
+    }
+
+    public function testTemplatePathUnknownFlagIsIgnored(): void
+    {
+        $result = $this->callProtected('templatePath', ['{$name|X}', ['name' => 'foo']]);
+        $this->assertSame('foo', $result);
+    }
+
+    public function testTemplatePathNoFlagBehaviourUnchanged(): void
+    {
+        $result = $this->callProtected('templatePath', ['{$name}', ['name' => 'my-package']]);
+        $this->assertSame('my-package', $result);
+    }
+
+    public function testTemplatePathMixedFlagsAndPlainPlaceholders(): void
+    {
+        $result = $this->callProtected('templatePath', ['lib/{$vendor}/{$name|FP}', ['vendor' => 'acme', 'name' => 'my-lib']]);
+        $this->assertSame('lib/acme/MyLib', $result);
+    }
+
     // -----------------------------------------------------------------------
     // mapCustomInstallPaths()
     // -----------------------------------------------------------------------
