@@ -11,6 +11,15 @@ https://getcomposer.org/doc/04-schema.md#type
 >
 > Package types are used for custom installation logic. If you have a package that needs some special logic, you can define a custom type. This could be a symfony-bundle, a wordpress-plugin or a typo3-module. These types will all be specific to certain projects, and they will need to provide an installer capable of installing packages of that type.
 
+Why this plugin?
+----------------
+
+Composer has a built-in `installer-paths` key, but it only works if the package itself declares a dependency on `composer/installers` — something most packages on Packagist don't do. If you add an `installer-paths` rule for a package that doesn't opt in, Composer silently ignores it and installs the package to `vendor/` anyway.
+
+This plugin removes that constraint. It intercepts installation at the root-project level, so any package can be redirected to a custom path without requiring any changes to the package itself.
+
+In short: if you've ever added `installer-paths` and nothing happened, this plugin is the fix.
+
 Requirements
 ------------
 
@@ -204,6 +213,121 @@ Complete example
     }
 }
 ```
+
+Real-world use cases
+--------------------
+
+### WordPress with WPackagist
+
+Most WordPress plugins available via [WPackagist](https://wpackagist.org) don't require `composer/installers`, so native `installer-paths` silently fails for them. This plugin makes it work:
+
+```json
+{
+    "require": {
+        "mnsami/composer-custom-directory-installer": "^2.1",
+        "wpackagist-plugin/contact-form-7": "*",
+        "wpackagist-theme/twentytwentyfour": "*"
+    },
+    "config": {
+        "allow-plugins": {
+            "mnsami/composer-custom-directory-installer": true
+        }
+    },
+    "extra": {
+        "installer-types": ["wordpress-plugin", "wordpress-theme"],
+        "installer-paths": {
+            "wp-content/plugins/{$name}/": ["type:wordpress-plugin"],
+            "wp-content/themes/{$name}/":  ["type:wordpress-theme"]
+        }
+    }
+}
+```
+
+### Docker / keeping vendor outside the web root
+
+Put one package (e.g. a CLI tool) in a path that's bind-mounted into a container, while everything else stays in `vendor/`:
+
+```json
+"extra": {
+    "installer-paths": {
+        "/tools/{$name}/": ["vendor/some-cli-tool"]
+    }
+}
+```
+
+### Monorepos with sibling library directories
+
+Route internal packages to their canonical location in the repo tree:
+
+```json
+"extra": {
+    "installer-types": ["company-module"],
+    "installer-paths": {
+        "../modules/{$name}/": ["type:company-module"]
+    }
+}
+```
+
+### PascalCase or namespaced paths
+
+Use [path variable flags](#path-variable-flags) to match the naming convention your framework expects:
+
+```json
+"extra": {
+    "installer-paths": {
+        "src/Modules/{$name|FP}/": ["acme/*"]
+    }
+}
+```
+
+`acme/my-module` installs to `src/Modules/MyModule/`.
+
+Migrating from oomphinc/composer-installers-extender
+------------------------------------------------------
+
+[`oomphinc/composer-installers-extender`](https://packagist.org/packages/oomphinc/composer-installers-extender) has not had a functional release since December 2021. This plugin is a maintained, drop-in alternative with a superset of its features (path variable flags, three-pass precedence, traversal guards).
+
+**Before:**
+
+```json
+"require": {
+    "composer/installers": "^2.0",
+    "oomphinc/composer-installers-extender": "^2.0"
+},
+"config": {
+    "allow-plugins": {
+        "composer/installers": true,
+        "oomphinc/composer-installers-extender": true
+    }
+},
+"extra": {
+    "installer-types": ["drupal-module"],
+    "installer-paths": {
+        "web/modules/contrib/{$name}/": ["type:drupal-module"]
+    }
+}
+```
+
+**After:**
+
+```json
+"require": {
+    "mnsami/composer-custom-directory-installer": "^2.1"
+},
+"config": {
+    "allow-plugins": {
+        "mnsami/composer-custom-directory-installer": true
+    }
+},
+"extra": {
+    "installer-types": ["drupal-module"],
+    "installer-paths": {
+        "web/modules/contrib/{$name}/": ["type:drupal-module"]
+    }
+}
+```
+
+The `extra.installer-types` and `extra.installer-paths` keys are identical — only the `require` and `allow-plugins` entries change. If you required `composer/installers` solely for path routing (not for any package's own declared dependency), you can remove it too.
 
 Security
 --------
