@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 
 class PearPluginTest extends TestCase
 {
-    public function testActivateSkipsRegistrationAndLogsWarningWhenPearInstallerUnavailable(): void
+    public function testActivateSkipsRegistrationSilentlyWhenPearInstallerUnavailable(): void
     {
         if (class_exists('Composer\Installer\PearInstaller')) {
             $this->markTestSkipped('BasePearInstaller is present in this environment; cannot test the skip path.');
@@ -23,9 +23,7 @@ class PearPluginTest extends TestCase
         $composer->method('getInstallationManager')->willReturn($installationManager);
 
         $io = $this->createMock(IOInterface::class);
-        $io->expects($this->once())
-            ->method('writeError')
-            ->with($this->stringContains('PearInstaller'));
+        $io->expects($this->never())->method('writeError');
 
         $plugin = new PearPlugin();
         $plugin->activate($composer, $io);

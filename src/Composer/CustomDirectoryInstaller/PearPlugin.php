@@ -19,8 +19,8 @@ class PearPlugin implements PluginInterface
     /**
      * Activates the plugin by registering the PearInstaller.
      *
-     * Logs a warning and skips registration if PearInstaller is not available
-     * (e.g. when running under Composer 2.x).
+     * Skips registration silently if PearInstaller is not available
+     * (e.g. when running under Composer 2.x, where PEAR support was removed).
      *
      * @param Composer    $composer The Composer instance.
      * @param IOInterface $io       The input/output interface.
@@ -29,8 +29,6 @@ class PearPlugin implements PluginInterface
     public function activate(Composer $composer, IOInterface $io): void
     {
         if (!class_exists('Composer\Installer\PearInstaller')) {
-            $io->writeError('<warning>PearInstaller is not available (removed in Composer 2.x); PearPlugin skipping registration.</warning>');
-
             return;
         }
         $this->installer = new PearInstaller($io, $composer);
