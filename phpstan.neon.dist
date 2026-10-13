@@ -1,0 +1,8 @@
+includes:
+    # Composer's own PHPStan extensions (typed Config::get() returns etc.)
+    - vendor/composer/composer/phpstan/rules.neon
+
+parameters:
+    level: max
+    paths:
+        - src
