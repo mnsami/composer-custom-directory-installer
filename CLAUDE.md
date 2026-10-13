@@ -62,7 +62,7 @@ All path logic lives in `PackageUtils::getPackageInstallPath()`. The flow:
 4. Call `mapCustomInstallPaths()` which uses a **three-pass** approach to enforce precedence **globally across all entries** (not per-entry):
    - Pass 1: Exact name match (`"vendor/name"`) — scans all entries first
    - Pass 2: Type prefix match (`"type:library"`) — scans all entries
-   - Pass 3: Wildcard glob match (`"vendor/*"`) — scans all entries last
+   - Pass 3: Wildcard glob match (`"vendor/*"`) — scans all entries last; `"vendor:acme"` is rewritten to `"acme/*"` in this pass, so it has the same rank as a glob, not a tier of its own
 5. Substitute `{$...}` variables with `templatePath()`; if a placeholder has a `|flags` suffix (e.g. `{$name|FP}`), apply transformations via `applyFlags()` — `F` = ucfirst, `P` = strip separators + camelCase, `U` = strtoupper. Unknown flags are silently ignored.
 6. Reject resolved paths containing `..` (traversal guard) or starting with `/` or a drive letter (absolute path guard).
 
