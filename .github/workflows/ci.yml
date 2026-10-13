@@ -19,3 +19,14 @@ jobs:
           php_version: ${{ matrix.php }}
       - run: vendor/bin/phpunit
       - run: vendor/bin/php-cs-fixer fix src --dry-run --diff --config .php-cs-fixer.dist.php
+  lowest-composer:
+    name: Composer 2.3 (lowest supported)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: php-actions/composer@v6
+        with:
+          php_version: '8.1'
+          command: require
+          args: composer/composer:2.3.* --dev
+      - run: vendor/bin/phpunit
