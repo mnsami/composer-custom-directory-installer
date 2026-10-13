@@ -3,7 +3,7 @@ composer-custom-directory-installer
 
 A Composer plugin to install packages in custom directories outside the default `vendor` folder.
 
-This is not another `composer-installer` library for supporting non-composer package types such as `application`. By default it handles `library`-type packages, but you can extend it to any Composer package type via `extra.installer-types` in your root `composer.json`.
+This is not another `composer-installer` library for supporting non-composer package types such as `application`. By default it handles `library` and `composer-plugin` packages, and you can extend it to any other Composer package type via `extra.installer-types` in your root `composer.json`.
 
 Table of Contents
 -----------------
@@ -28,7 +28,8 @@ Table of Contents
   - [PascalCase or namespaced paths](#pascalcase-or-namespaced-paths)
 - [Migrating from oomphinc/composer-installers-extender](#migrating-from-oomphinccomposer-installers-extender)
 - [Security](#security)
-- [Upgrading from v1.x](#upgrading-from-v1x)
+- [Troubleshooting](#troubleshooting)
+- [Upgrading to v2.1](#upgrading-to-v21)
 - [Note](#note)
 
 https://getcomposer.org/doc/04-schema.md#type
@@ -40,9 +41,9 @@ https://getcomposer.org/doc/04-schema.md#type
 Why this plugin?
 ----------------
 
-Composer has a built-in `installer-paths` key, but it only works if the package itself declares a dependency on `composer/installers` — something most packages on Packagist don't do. If you add an `installer-paths` rule for a package that doesn't opt in, Composer silently ignores it and installs the package to `vendor/` anyway.
+Composer itself does not read `installer-paths`. The key is interpreted by [`composer/installers`](https://github.com/composer/installers), and that plugin only acts on packages whose `type` is one of the framework types in its list (`wordpress-plugin`, `drupal-module`, …). A plain `library` package — which is most of Packagist — never matches, so Composer silently installs it to `vendor/` no matter what your `installer-paths` says.
 
-This plugin removes that constraint. It intercepts installation at the root-project level, so any package can be redirected to a custom path without requiring any changes to the package itself.
+This plugin acts on any package regardless of its type. It routes `library` packages out of the box, `composer-plugin` packages through its own installer, and any other type you list in `extra.installer-types`. The rule lives in the root project, so the package itself needs no changes.
 
 In short: if you've ever added `installer-paths` and nothing happened, this plugin is the fix.
 
@@ -199,7 +200,7 @@ When set, `{$name}` in the path template will resolve to `my-custom-name` instea
 Supporting Custom Package Types
 --------------------------------
 
-By default the plugin only handles the `library` package type. To install packages of other types (e.g. `drupal-module`, `wordpress-plugin`) into custom directories, declare those types in `extra.installer-types`:
+By default the plugin handles the `library` package type, and `composer-plugin` packages through its own `PluginPlugin` installer. To install packages of other types (e.g. `drupal-module`, `wordpress-plugin`) into custom directories, declare those types in `extra.installer-types`:
 
 ```json
 "extra": {
@@ -211,7 +212,7 @@ By default the plugin only handles the `library` package type. To install packag
 }
 ```
 
-The plugin will claim any package whose type appears in `installer-types` and apply the matching `installer-paths` rule. Without this list, packages of non-`library` types are left to Composer's default installer.
+The plugin will claim any package whose type appears in `installer-types` and apply the matching `installer-paths` rule. Without this list, packages of any other type are left to Composer's default installer.
 
 Complete example
 ----------------
@@ -245,7 +246,7 @@ Real-world use cases
 
 ### WordPress with WPackagist
 
-Most WordPress plugins available via [WPackagist](https://wpackagist.org) don't require `composer/installers`, so native `installer-paths` silently fails for them. This plugin makes it work:
+Packages from [WPackagist](https://wpackagist.org) are typed `wordpress-plugin` and `wordpress-theme`. Without a plugin that claims those types they land in `vendor/`; two `installer-types` entries route them where WordPress expects them:
 
 ```json
 {
@@ -276,7 +277,7 @@ Put one package (e.g. a CLI tool) in a path that's bind-mounted into a container
 ```json
 "extra": {
     "installer-paths": {
-        "/tools/{$name}/": ["vendor/some-cli-tool"]
+        "tools/{$name}/": ["vendor/some-cli-tool"]
     }
 }
 ```
@@ -289,7 +290,7 @@ Route internal packages to their canonical location in the repo tree:
 "extra": {
     "installer-types": ["company-module"],
     "installer-paths": {
-        "../modules/{$name}/": ["type:company-module"]
+        "modules/{$name}/": ["type:company-module"]
     }
 }
 ```
@@ -365,14 +366,23 @@ Resolved install paths are validated against two attack vectors:
 
 Both checks apply after all `{$variable}` substitutions are complete.
 
-Upgrading from v1.x
---------------------
+Troubleshooting
+---------------
 
-| | v1.x | v2.x |
+**`Resolved install path '/tools/foo/' must be a relative path.`** or **`Resolved install path '../modules/foo/' contains '..', which is not allowed.`**
+
+An `installer-paths` template resolved to an absolute path (leading `/` or a Windows drive letter) or climbed out of the project with `..`. Both are rejected by the [path guards](#security). Install paths are relative to the project root: write `tools/{$name}/` rather than `/tools/{$name}/`, and keep targets inside the project rather than `../modules/{$name}/`. If the template itself looks fine, check the package's own `extra.installer-name` — it is substituted for `{$name}` and can carry the offending characters.
+
+Upgrading to v2.1
+-----------------
+
+v2.1 is where the platform requirements change: PHP >= 8.1 and Composer 2 only. v2.0 was a Composer 2 compatibility release that still ran on PHP 5.3 and Composer 1, so the table applies whether you come from v1.x or v2.0.
+
+| | <= v2.0 | v2.1+ |
 |---|---|---|
 | PHP | >= 5.3 | >= 8.1 |
 | Composer | 1.x / 2.x | 2.x only |
-| Require string | `"1.*"` | `"^2.1"` |
+| Require string | `"1.*"` / `"^2.0"` | `"^2.1"` |
 | `type:` matching | No | Yes |
 | Wildcard `vendor/*` | No | Yes |
 | `{$type}` variable | No | Yes |
