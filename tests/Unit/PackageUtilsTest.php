@@ -41,10 +41,8 @@ class PackageUtilsTest extends TestCase
 
     private function callProtected(string $method, array $args): mixed
     {
-        $m = new ReflectionMethod(PackageUtils::class, $method);
-        $m->setAccessible(true);
-
-        return $m->invoke(null, ...$args);
+        // No setAccessible(): a no-op since PHP 8.1 and deprecated in 8.5.
+        return (new ReflectionMethod(PackageUtils::class, $method))->invoke(null, ...$args);
     }
 
     // -----------------------------------------------------------------------
