@@ -40,7 +40,7 @@ The Docker image must be built first (`make composer-install` does this). If `co
 
 ## Architecture
 
-This is a **Composer plugin** (`type: composer-plugin`) that installs packages into custom paths instead of the default `vendor/` directory. It registers three installers — one per Composer package type — via three corresponding plugin entry points listed in `extra.class` in `composer.json`.
+This is a **Composer plugin** (`type: composer-plugin`) that installs packages into custom paths instead of the default `vendor/` directory. It registers two installers — one per Composer package type — via two corresponding plugin entry points listed in `extra.class` in `composer.json`.
 
 ### Plugin / Installer pairs
 
@@ -49,7 +49,6 @@ Each pair follows the same pattern: the Plugin implements `PluginInterface`, ins
 | Plugin | Installer | Handles |
 |---|---|---|
 | `LibraryPlugin` | `LibraryInstaller` | `library` type (default); also any type listed in root `extra.installer-types` via `supports()` override |
-| `PearPlugin` | `PearInstaller` | `pear-library` type (deprecated in Composer 2.x) |
 | `PluginPlugin` | `PluginInstaller` | `composer-plugin` type |
 
 ### Path resolution (`PackageUtils`)
@@ -79,8 +78,6 @@ Tests live in `tests/Unit/` — one file per source class. Protected/private met
 **Precedence is global across entries, not per-entry.** An exact match in entry 2 beats a wildcard in entry 1. The three-pass algorithm in `mapCustomInstallPaths()` scans all entries for exact matches before considering type or wildcard matches in any entry.
 
 **`installer-name` affects substitution, not matching.** A package's `extra.installer-name` overrides the `{$name}` variable used in path templates, but pattern matching still uses the original `vendor/name` from `getPrettyName()`. A pattern of `"acme/foo"` will NOT match a package named `acme/bar` even if that package sets `installer-name: foo`.
-
-**`PearPlugin` is always a no-op in Composer 2.x.** `Composer\Installer\PearInstaller` was removed in Composer 2.x. `PearPlugin::activate()` checks `class_exists()` and skips registration if the class is absent, so PEAR tests are always skipped in the dev environment. `$installer` is nullable (`?PearInstaller = null`) and `deactivate()` guards against it being null.
 
 **`failOnDeprecation` is enabled in `phpunit.xml`.** The test suite fails on any PHP deprecation notice, including those from Composer internals. New code that calls deprecated Composer API methods will break CI even if logic is correct.
 
