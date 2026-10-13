@@ -267,6 +267,31 @@ class PackageUtilsTest extends TestCase
         $this->assertSame('type-path', $result);
     }
 
+    public function testMapCustomInstallPathsMatchesCaseInsensitively(): void
+    {
+        // Composer names and types are lowercase; patterns may be written in any case.
+        $this->assertSame('exact', $this->callProtected('mapCustomInstallPaths', [['exact' => ['Acme/Foo']], 'acme/foo', '']));
+        $this->assertSame('type', $this->callProtected('mapCustomInstallPaths', [['type' => ['type:WordPress-Plugin']], 'acme/foo', 'wordpress-plugin']));
+        $this->assertSame('glob', $this->callProtected('mapCustomInstallPaths', [['glob' => ['ACME/*']], 'acme/foo', '']));
+        $this->assertSame('vendor', $this->callProtected('mapCustomInstallPaths', [['vendor' => ['Vendor:Acme']], 'acme/foo', '']));
+    }
+
+    public function testMapCustomInstallPathsMatchesGlobsWithoutStar(): void
+    {
+        // Any fnmatch metacharacter makes a pattern a glob, not only "*".
+        $paths = ['q' => ['acme/foo?'], 'range' => ['acme/bar[0-9]']];
+        $this->assertSame('q', $this->callProtected('mapCustomInstallPaths', [$paths, 'acme/foo1', '']));
+        $this->assertSame('range', $this->callProtected('mapCustomInstallPaths', [$paths, 'acme/bar7', '']));
+        $this->assertFalse($this->callProtected('mapCustomInstallPaths', [$paths, 'acme/barx', '']));
+    }
+
+    public function testMapCustomInstallPathsIgnoresNonStringPatterns(): void
+    {
+        $paths = ['custom' => [null, 42, 'acme/foo']];
+        $this->assertSame('custom', $this->callProtected('mapCustomInstallPaths', [$paths, 'acme/foo', '']));
+        $this->assertFalse($this->callProtected('mapCustomInstallPaths', [$paths, 'acme/bar', '']));
+    }
+
     public function testMapCustomInstallPathsEmptyPathsReturnsFalse(): void
     {
         $result = $this->callProtected('mapCustomInstallPaths', [[], 'acme/mylib', '']);
@@ -355,6 +380,44 @@ class PackageUtilsTest extends TestCase
 
         $result = PackageUtils::getPackageInstallPath($package, $composer);
         $this->assertSame('custom/wordpress-plugin/acme/myplugin', $result);
+    }
+
+    public function testGetPackageInstallPathMatchesPatternCaseInsensitively(): void
+    {
+        $package = $this->makePackage('acme/foo');
+        $composer = $this->makeComposer(['installer-paths' => ['libs/{$name}' => ['Acme/Foo']]]);
+
+        $this->assertSame('libs/foo', PackageUtils::getPackageInstallPath($package, $composer));
+    }
+
+    public function testGetPackageInstallPathStripsTrailingSlash(): void
+    {
+        $package = $this->makePackage('monolog/monolog');
+        $composer = $this->makeComposer(['installer-paths' => ['./monolog/' => ['monolog/monolog']]]);
+
+        $this->assertSame('./monolog', PackageUtils::getPackageInstallPath($package, $composer));
+    }
+
+    public function testGetPackageInstallPathThrowsOnUncPath(): void
+    {
+        $package = $this->makePackage('acme/mylib');
+        $composer = $this->makeComposer(['installer-paths' => ['\\\\server\\share\\{$name}' => ['acme/mylib']]]);
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('must be a relative path');
+
+        PackageUtils::getPackageInstallPath($package, $composer);
+    }
+
+    public function testGetPackageInstallPathThrowsOnBackslashLeadingPath(): void
+    {
+        $package = $this->makePackage('acme/mylib');
+        $composer = $this->makeComposer(['installer-paths' => ['\\foo\\{$name}' => ['acme/mylib']]]);
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('must be a relative path');
+
+        PackageUtils::getPackageInstallPath($package, $composer);
     }
 
     public function testGetPackageInstallPathThrowsOnPathTraversal(): void

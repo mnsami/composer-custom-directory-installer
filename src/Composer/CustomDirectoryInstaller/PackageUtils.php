@@ -26,12 +26,13 @@ class PackageUtils
      *  - Wildcard glob:       "vendor/*" (or its alias "vendor:vendor")
      *
      * Precedence is enforced globally across all installer-paths entries, not per-entry.
+     * Matching is case-insensitive; Composer names and types are canonically lowercase.
      *
      * Supported path variables: {$vendor}, {$name}, {$type}
      *
      * @param PackageInterface $package  The package being installed.
      * @param Composer         $composer The Composer instance (used to read root extra).
-     * @return string|null The resolved install path, or null if no match found.
+     * @return string|null The resolved install path without a trailing slash, or null if no match found.
      * @throws \InvalidArgumentException If a template uses an unknown variable or flag, or the resolved path contains '..' or is absolute.
      */
     public static function getPackageInstallPath(PackageInterface $package, Composer $composer): ?string
@@ -72,7 +73,8 @@ class PackageUtils
                     );
                 }
 
-                if (str_starts_with($resolvedPath, '/') || preg_match('/^[A-Za-z]:[\\/\\\\]/', $resolvedPath)) {
+                // Absolute: a leading "/" or "\" (the latter also covers UNC "\\server\share"), or a drive letter.
+                if (preg_match('@^(?:[/\\\\]|[A-Za-z]:[/\\\\])@', $resolvedPath)) {
                     throw new \InvalidArgumentException(
                         sprintf(
                             "Resolved install path '%s' must be a relative path.",
@@ -81,7 +83,7 @@ class PackageUtils
                     );
                 }
 
-                return $resolvedPath;
+                return rtrim($resolvedPath, '/');
             }
         }
 
@@ -173,7 +175,10 @@ class PackageUtils
      * Matching precedence (highest to lowest), enforced globally across all entries:
      *  1. Exact package name match (e.g. "vendor/name")
      *  2. Package type prefix match (e.g. "type:library")
-     *  3. Wildcard glob match (e.g. "vendor/*"); "vendor:acme" is an alias of "acme/*" at this rank
+     *  3. Glob match: any pattern containing "*", "?" or "[" is matched with fnmatch()
+     *     (e.g. "vendor/*"); "vendor:acme" is an alias of "acme/*" at this rank
+     *
+     * Matching is case-insensitive. Non-string patterns are ignored.
      *
      * @param  array<string,string[]> $paths The installer-paths map (path => [package names/patterns]).
      * @param  string                 $name  The package pretty name to match.
@@ -182,9 +187,17 @@ class PackageUtils
      */
     protected static function mapCustomInstallPaths(array $paths, string $name, string $type = ''): string|false
     {
+        // Composer names and types are lowercase; accept patterns in any case and drop non-string entries.
+        $name = strtolower($name);
+        $type = strtolower($type);
+        $paths = array_map(
+            static fn(array $names): array => array_map('strtolower', array_filter($names, 'is_string')),
+            $paths
+        );
+
         // Pass 1: exact name match (highest precedence across all entries)
         foreach ($paths as $path => $names) {
-            if (in_array($name, $names)) {
+            if (in_array($name, $names, true)) {
                 return $path;
             }
         }
@@ -192,7 +205,7 @@ class PackageUtils
         // Pass 2: type-prefix match
         if (!empty($type)) {
             foreach ($paths as $path => $names) {
-                if (in_array('type:' . $type, $names)) {
+                if (in_array('type:' . $type, $names, true)) {
                     return $path;
                 }
             }
@@ -204,7 +217,7 @@ class PackageUtils
                 if (str_starts_with($pattern, 'vendor:')) {
                     $pattern = substr($pattern, 7) . '/*';
                 }
-                if (str_contains($pattern, '*') && fnmatch($pattern, $name)) {
+                if (strpbrk($pattern, '*?[') !== false && fnmatch($pattern, $name)) {
                     return $path;
                 }
             }

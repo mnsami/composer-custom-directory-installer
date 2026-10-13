@@ -158,6 +158,8 @@ Matching Strategies
 
 `installer-paths` supports three matching strategies. Precedence is evaluated **globally across all entries**: all entries are first scanned for an exact name match, then for a type match, then for a wildcard match. An exact match in a later-listed entry always wins over a wildcard match in an earlier-listed entry.
 
+Matching is case-insensitive: Composer package names and types are lowercase, so `Acme/Foo` and `type:WordPress-Plugin` match `acme/foo` and `wordpress-plugin`. A trailing slash on a path template is dropped from the resolved path (`./monolog/` installs to `./monolog`).
+
 ### 1. Exact package name (highest precedence)
 
 Matches one specific package:
@@ -180,7 +182,7 @@ Matches all packages of a given Composer type using the `type:` prefix:
 
 ### 3. Wildcard vendor glob (lowest precedence)
 
-Matches all packages from a given vendor using `*`:
+Matches all packages from a given vendor using `*`. Patterns are shell-style globs, so `?` and `[...]` work as well; any pattern containing `*`, `?` or `[` is treated as a glob:
 
 ```json
 "installer-paths": {
@@ -379,7 +381,7 @@ Security
 Resolved install paths are validated against two attack vectors:
 
 - **Directory traversal** — a resolved path containing `..` throws an `InvalidArgumentException`.
-- **Absolute path injection** — a resolved path that is absolute (starting with `/` or a Windows drive letter) throws an `InvalidArgumentException`. This can occur when a package's `installer-name` is set to an absolute path value.
+- **Absolute path injection** — a resolved path that is absolute (starting with `/`, `\`, a UNC prefix such as `\\server\share`, or a Windows drive letter) throws an `InvalidArgumentException`. This can occur when a package's `installer-name` is set to an absolute path value.
 
 Both checks apply after all `{$variable}` substitutions are complete.
 
