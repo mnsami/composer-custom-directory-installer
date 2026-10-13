@@ -184,6 +184,14 @@ Matches all packages from a given vendor using `*`:
 }
 ```
 
+`vendor:acme` is accepted as an alias of `acme/*` at the same precedence. It is the spelling used by `composer/installers` and `oomphinc/composer-installers-extender`, so existing configurations keep working:
+
+```json
+"installer-paths": {
+    "./acme-libs/{$name}/": ["vendor:acme"]
+}
+```
+
 Custom `installer-name`
 -----------------------
 
@@ -354,7 +362,12 @@ Migrating from oomphinc/composer-installers-extender
 }
 ```
 
-The `extra.installer-types` and `extra.installer-paths` keys are identical — only the `require` and `allow-plugins` entries change. If you required `composer/installers` solely for path routing (not for any package's own declared dependency), you can remove it too.
+The `extra.installer-types` key is unchanged, and `extra.installer-paths` accepts the same entries — exact names, `type:` and `vendor:` — with two differences to check:
+
+- **Precedence is global, not first-entry-wins.** oomphinc walks the entries in order and takes the first match. This plugin checks every entry for an exact package name first, then every entry for a `type:` match, then every entry for `vendor:` and `*` globs (see [Matching Strategies](#matching-strategies)). If an earlier `type:` or `vendor:` entry used to shadow a later exact name, the exact name now wins.
+- **Multi-package patterns need `{$name}` in the path.** A `type:`, `vendor:` or `acme/*` entry whose path has no `{$name}` (or another distinguishing variable) sends every matching package to the same directory, and each install overwrites the previous one. The hazard existed with oomphinc too, but a precedence change can make a different rule apply to a package than before.
+
+Otherwise only the `require` and `allow-plugins` entries change. If you required `composer/installers` solely for path routing (not for any package's own declared dependency), you can remove it too.
 
 Security
 --------

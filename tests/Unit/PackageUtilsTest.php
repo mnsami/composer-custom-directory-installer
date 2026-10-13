@@ -188,6 +188,36 @@ class PackageUtilsTest extends TestCase
         $this->assertFalse($result);
     }
 
+    public function testMapCustomInstallPathsMatchesVendorPrefix(): void
+    {
+        $paths = ['acme-libs/{$name}' => ['vendor:acme']];
+        $this->assertSame('acme-libs/{$name}', $this->callProtected('mapCustomInstallPaths', [$paths, 'acme/mylib', '']));
+        $this->assertFalse($this->callProtected('mapCustomInstallPaths', [$paths, 'other/mylib', '']));
+    }
+
+    public function testMapCustomInstallPathsExactNameAndTypeWinOverVendorPrefix(): void
+    {
+        $paths = [
+            'vendor-path' => ['vendor:acme'],
+            'type-path' => ['type:library'],
+            'exact-path' => ['acme/mylib'],
+        ];
+        $this->assertSame('exact-path', $this->callProtected('mapCustomInstallPaths', [$paths, 'acme/mylib', 'library']));
+        $this->assertSame('type-path', $this->callProtected('mapCustomInstallPaths', [$paths, 'acme/other', 'library']));
+        $this->assertSame('vendor-path', $this->callProtected('mapCustomInstallPaths', [$paths, 'acme/other', 'wordpress-plugin']));
+    }
+
+    public function testMapCustomInstallPathsVendorPrefixAndGlobShareLowestPrecedence(): void
+    {
+        // Same rank: the first-listed entry wins, whichever spelling it uses.
+        $this->assertSame('glob-path', $this->callProtected('mapCustomInstallPaths', [
+            ['glob-path' => ['acme/*'], 'vendor-path' => ['vendor:acme']], 'acme/mylib', '',
+        ]));
+        $this->assertSame('vendor-path', $this->callProtected('mapCustomInstallPaths', [
+            ['vendor-path' => ['vendor:acme'], 'glob-path' => ['acme/*']], 'acme/mylib', '',
+        ]));
+    }
+
     public function testMapCustomInstallPathsExactNameWinsOverWildcard(): void
     {
         $paths = [
@@ -291,6 +321,14 @@ class PackageUtilsTest extends TestCase
 
         $result = PackageUtils::getPackageInstallPath($package, $composer);
         $this->assertSame('acme-libs/anything', $result);
+    }
+
+    public function testGetPackageInstallPathResolvesVendorPrefixMatch(): void
+    {
+        $package = $this->makePackage('acme/foo');
+        $composer = $this->makeComposer(['installer-paths' => ['libs/{$name}' => ['vendor:acme']]]);
+
+        $this->assertSame('libs/foo', PackageUtils::getPackageInstallPath($package, $composer));
     }
 
     public function testGetPackageInstallPathSubstitutesTypeVariable(): void

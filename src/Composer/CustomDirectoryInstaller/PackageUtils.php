@@ -23,7 +23,7 @@ class PackageUtils
      * Supported matching strategies (highest to lowest precedence):
      *  - Exact package name:  "vendor/name"
      *  - Package type prefix: "type:library"
-     *  - Wildcard glob:       "vendor/*"
+     *  - Wildcard glob:       "vendor/*" (or its alias "vendor:vendor")
      *
      * Precedence is enforced globally across all installer-paths entries, not per-entry.
      *
@@ -159,7 +159,7 @@ class PackageUtils
      * Matching precedence (highest to lowest), enforced globally across all entries:
      *  1. Exact package name match (e.g. "vendor/name")
      *  2. Package type prefix match (e.g. "type:library")
-     *  3. Wildcard glob match (e.g. "vendor/*")
+     *  3. Wildcard glob match (e.g. "vendor/*"); "vendor:acme" is an alias of "acme/*" at this rank
      *
      * @param  array<string,string[]> $paths The installer-paths map (path => [package names/patterns]).
      * @param  string                 $name  The package pretty name to match.
@@ -184,9 +184,12 @@ class PackageUtils
             }
         }
 
-        // Pass 3: wildcard glob match (lowest precedence)
+        // Pass 3: wildcard glob match (lowest precedence); "vendor:acme" is spelled "acme/*"
         foreach ($paths as $path => $names) {
             foreach ($names as $pattern) {
+                if (str_starts_with($pattern, 'vendor:')) {
+                    $pattern = substr($pattern, 7) . '/*';
+                }
                 if (str_contains($pattern, '*') && fnmatch($pattern, $name)) {
                     return $path;
                 }

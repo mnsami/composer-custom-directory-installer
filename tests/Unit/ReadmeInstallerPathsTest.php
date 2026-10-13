@@ -40,9 +40,11 @@ class ReadmeInstallerPathsTest extends TestCase
     #[DataProvider('readmeExamples')]
     public function testReadmeExampleResolvesWithoutThrowing(string $path, string $pattern): void
     {
-        [$name, $type] = str_starts_with($pattern, 'type:')
-            ? ['acme/example', substr($pattern, 5)]
-            : [str_replace('*', 'example', $pattern), 'library'];
+        [$name, $type] = match (true) {
+            str_starts_with($pattern, 'type:') => ['acme/example', substr($pattern, 5)],
+            str_starts_with($pattern, 'vendor:') => [substr($pattern, 7) . '/example', 'library'],
+            default => [str_replace('*', 'example', $pattern), 'library'],
+        };
 
         $package = $this->createMock(PackageInterface::class);
         $package->method('getPrettyName')->willReturn($name);
