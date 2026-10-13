@@ -13,6 +13,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         php: ['8.1', '8.2', '8.3', '8.4', '8.5']
     steps:
@@ -31,7 +32,6 @@ jobs:
           php_extensions: xdebug
           configuration: phpunit.xml
           coverage_text: true
-      - run: vendor/bin/php-cs-fixer fix src --dry-run --diff --config .php-cs-fixer.dist.php
   lowest-composer:
     name: Composer 2.3 (lowest supported)
     runs-on: ubuntu-latest
@@ -62,10 +62,23 @@ jobs:
       - run: composer install --no-interaction --no-progress
       # Composer's bin proxies are PHP files, so this form works in PowerShell too.
       - run: php vendor/bin/phpunit
+  # The two tool jobs run on the runner's own PHP, so vendor/ is resolved for the project's
+  # minimum PHP: dependencies resolved for a newer PHP than the runner's can fail to parse.
+  code-style:
+    name: php-cs-fixer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: php-actions/composer@v6
+        with:
+          php_version: '8.1'
+      - run: vendor/bin/php-cs-fixer fix src --dry-run --diff --config .php-cs-fixer.dist.php
   static-analysis:
     name: PHPStan
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: php-actions/composer@v6
+        with:
+          php_version: '8.1'
       - run: vendor/bin/phpstan analyse --no-progress
