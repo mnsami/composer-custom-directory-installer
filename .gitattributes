@@ -1,0 +1,13 @@
+# Keep dist archives (GitHub source archives used by Packagist, `composer archive`)
+# to what users need: src/, composer.json, LICENSE, README.md, CHANGELOG.md, SECURITY.md.
+/.claude                export-ignore
+/.github                export-ignore
+/.gitattributes         export-ignore
+/.gitignore             export-ignore
+/.php-cs-fixer.dist.php export-ignore
+/CLAUDE.md              export-ignore
+/Dockerfile             export-ignore
+/Makefile               export-ignore
+/phpstan.neon.dist      export-ignore
+/phpunit.xml            export-ignore
+/tests                  export-ignore
