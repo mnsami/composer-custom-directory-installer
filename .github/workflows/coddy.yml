@@ -1,0 +1,47 @@
+# coddy's PR check: the PR must close an issue that is open and assigned.
+# Keyed on the closing references ("Closes #n"), not the branch name, so a
+# branch an agent named itself passes. Open and assigned, not the "in
+# progress" label: /coddy:ship takes the label off when it opens the PR and
+# this runs again on every push, while claim's assignee holds until the merge.
+# GitHub computes the references only on a PR against the repository's
+# default branch; on a PR stacked on another branch the closing keywords in
+# the description are read directly, so a sidebar-only link is not seen there.
+# ponytail: any assignee counts, not only the PR's author.
+name: coddy
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+jobs:
+  check:
+    name: closes a claimed issue
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      OWNER: ${{ github.repository_owner }}
+      REPO: ${{ github.event.repository.name }}
+      PR: ${{ github.event.pull_request.number }}
+      BASE: ${{ github.event.pull_request.base.ref }}
+      DEFAULT: ${{ github.event.repository.default_branch }}
+      BODY: ${{ github.event.pull_request.body }}
+    steps:
+      - run: |
+          linked=$(gh api graphql -f owner="$OWNER" -f repo="$REPO" -F pr="$PR" -f query='query($owner: String!, $repo: String!, $pr: Int!) { repository(owner: $owner, name: $repo) { pullRequest(number: $pr) { closingIssuesReferences(first: 20) { nodes { number state assignees(first: 1) { totalCount } } } } } }' --jq '.data.repository.pullRequest.closingIssuesReferences.nodes[] | "\(.number) \(.state) \(.assignees.totalCount)"')
+          if [ -z "$linked" ] && [ "$BASE" != "$DEFAULT" ]; then
+            # Stacked on another branch: GitHub computes no references, so read the description's closing keywords.
+            linked=$(for n in $(printf '%s\n' "$BODY" | grep -oiE '(^|[^[:alnum:]])(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)[[:space:]:]*#[0-9]+' | grep -oE '[0-9]+' | sort -un); do
+              gh api "repos/$OWNER/$REPO/issues/$n" --jq '"\(.number) \(.state | ascii_upcase) \(.assignees | length)"'
+            done)
+          fi
+          [ -n "$linked" ] || { echo "::error::no linked issue. Add 'Closes #<issue>' to the PR description."; exit 1; }
+          bad=0
+          while read -r n state assigned; do
+            [ "$state" = OPEN ] || { echo "::error::#$n is $state, not open."; bad=1; }
+            [ "$assigned" != 0 ] || { echo "::error::#$n is not claimed: nobody is assigned. Run /coddy:start $n or assign yourself, then re-run this check."; bad=1; }
+          done <<EOF
+          $linked
+          EOF
+          exit $bad
