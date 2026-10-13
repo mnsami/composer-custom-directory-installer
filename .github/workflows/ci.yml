@@ -21,7 +21,11 @@ jobs:
         with:
           php_version: ${{ matrix.php }}
       # Runs both suites on the matrix PHP, not the runner's; xdebug provides the coverage driver.
+      # The action forwards the job environment into its container, and Xdebug 3 only
+      # collects coverage when XDEBUG_MODE says so.
       - uses: php-actions/phpunit@v4
+        env:
+          XDEBUG_MODE: coverage
         with:
           php_version: ${{ matrix.php }}
           php_extensions: xdebug
