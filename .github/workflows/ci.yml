@@ -17,7 +17,8 @@ jobs:
       - uses: php-actions/composer@v6
         with:
           php_version: ${{ matrix.php }}
-      - run: vendor/bin/phpunit
+      # Unit and Integration suites; the runner's PHP has Xdebug, which provides the coverage driver.
+      - run: XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-text
       - run: vendor/bin/php-cs-fixer fix src --dry-run --diff --config .php-cs-fixer.dist.php
   lowest-composer:
     name: Composer 2.3 (lowest supported)

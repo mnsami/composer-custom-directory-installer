@@ -11,6 +11,9 @@
         }
     ],
     "config": {
+        "allow-plugins": {
+            "composer/installers": false
+        },
         "sort-packages": true
     },
     "minimum-stability": "stable",
@@ -26,6 +29,7 @@
     },
     "autoload-dev": {
         "psr-4": {
+            "App\\Tests\\Integration\\": "tests/Integration",
             "App\\Tests\\Unit\\": "tests/Unit"
         }
     },
@@ -41,6 +45,7 @@
     },
     "require-dev": {
         "composer/composer": "^2.0",
+        "composer/installers": "^2.3",
         "friendsofphp/php-cs-fixer": "^3.75",
         "phpunit/phpunit": "^10.5"
     }

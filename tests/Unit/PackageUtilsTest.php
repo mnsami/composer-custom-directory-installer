@@ -420,6 +420,26 @@ class PackageUtilsTest extends TestCase
         PackageUtils::getPackageInstallPath($package, $composer);
     }
 
+    public function testGetPackageInstallPathThrowsOnDriveLetterPath(): void
+    {
+        $package = $this->makePackage('acme/mylib');
+        $composer = $this->makeComposer(['installer-paths' => ['C:\\libs\\{$name}' => ['acme/mylib']]]);
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('must be a relative path');
+
+        PackageUtils::getPackageInstallPath($package, $composer);
+    }
+
+    public function testGetPackageInstallPathInstallerNameDoesNotAffectMatching(): void
+    {
+        // Patterns match the real package name; installer-name only changes what {$name} expands to.
+        $package = $this->makePackage('acme/bar', ['installer-name' => 'foo']);
+        $composer = $this->makeComposer(['installer-paths' => ['libs/{$name}' => ['acme/foo']]]);
+
+        $this->assertNull(PackageUtils::getPackageInstallPath($package, $composer));
+    }
+
     public function testGetPackageInstallPathThrowsOnPathTraversal(): void
     {
         $this->expectException(\InvalidArgumentException::class);
