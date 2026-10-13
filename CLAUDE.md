@@ -10,8 +10,12 @@ composer install
 # or via Docker (builds image first)
 make composer-install
 
-# Run tests
+# Run all tests (Unit + Integration)
 vendor/bin/phpunit
+
+# Run only the fast mock-based unit suite, or only the real-Composer integration suite
+vendor/bin/phpunit --testsuite Unit
+vendor/bin/phpunit --testsuite Integration
 # or via Docker (no local PHP needed)
 docker run --rm -v "$(pwd)":/app -w /app composer-custom-directory-installer vendor/bin/phpunit
 
@@ -30,7 +34,7 @@ make format
 docker run --rm -v "$(pwd)":/app -w /app composer-custom-directory-installer vendor/bin/php-cs-fixer fix src --dry-run --diff --config .php-cs-fixer.dist.php
 ```
 
-CI runs `phpunit` + `php-cs-fixer` dry-run against PHP 8.1, 8.2, and 8.3.
+CI runs `phpunit` (both suites, with Xdebug coverage via `--coverage-text`) + `php-cs-fixer` dry-run against PHP 8.1, 8.2, and 8.3, plus a lowest-Composer job on `composer/composer` 2.3.
 
 Available Makefile targets: `composer-install`, `format`, `shell`, `build-docker-image`. There is no `make test` — use the Docker run command above directly.
 
@@ -71,7 +75,10 @@ All source files use `Composer\CustomDirectoryInstaller\`. Tests use `App\Tests\
 
 ### Test structure
 
-Tests live in `tests/Unit/` — one file per source class. Protected/private methods in `PackageUtils` are tested via `ReflectionMethod` (see `callProtected()` helper in `PackageUtilsTest`).
+Two PHPUnit testsuites:
+
+- `tests/Unit/` — mock-based, one file per source class, plus `ReadmeInstallerPathsTest`, which feeds every `installer-paths` example in the README through the resolver. Protected/private methods in `PackageUtils` are tested via `ReflectionMethod` (see `callProtected()` helper in `PackageUtilsTest`).
+- `tests/Integration/InstallTest.php` — boots a real Composer in a temp project with `Factory::create()` + `Installer`, pulling this checkout and the packages under `tests/Integration/fixtures/` through `path` repositories (Packagist disabled), then asserts where packages land on disk. `composer/installers` is a dev dependency only so the co-install case can reference `vendor/composer/installers` the same way.
 
 ## Gotchas
 
@@ -81,7 +88,13 @@ Tests live in `tests/Unit/` — one file per source class. Protected/private met
 
 **`installer-name` affects substitution, not matching.** A package's `extra.installer-name` overrides the `{$name}` variable used in path templates, but pattern matching still uses the original `vendor/name` from `getPrettyName()`. A pattern of `"acme/foo"` will NOT match a package named `acme/bar` even if that package sets `installer-name: foo`.
 
-**`failOnDeprecation` is enabled in `phpunit.xml`.** The test suite fails on any PHP deprecation notice, including those from Composer internals. New code that calls deprecated Composer API methods will break CI even if logic is correct.
+**`failOnDeprecation` is enabled in `phpunit.xml`.** The unit suite fails on any PHP deprecation notice, including those from Composer internals. New code that calls deprecated Composer API methods will break CI even if logic is correct. The integration tests opt out with `#[WithoutErrorHandler]`: Composer probes not-yet-written autoload files through its `Silencer`, and PHPUnit would count every silenced read as a warning.
+
+**`Factory::create()` disables local plugins for any config path other than `./composer.json`.** `InstallTest` therefore `chdir()`s into the temp project and passes `null`; passing the absolute path silently runs without this plugin.
+
+**On a fresh install, Composer installs plugins in operation (alphabetical) order.** `plugin-modifies-install-path` only orders the *loading* of already-installed plugins. A `composer-plugin` package whose name sorts before `mnsami/composer-custom-directory-installer` is installed by Composer's own `PluginInstaller` into `vendor/` on the first run; `InstallTest` installs this plugin first, then adds the plugin package. Library packages are unaffected because all plugins are installed before them. Composer 2.3 additionally leaves an empty `vendor/<vendor>/` directory behind on a fresh install: it computes download paths for the whole batch before activating this plugin, so `DownloadManager` pre-creates the default parent directory. The package itself still lands at the custom path.
+
+**`composer/installers` in `require-dev` is an integration-test fixture, not a dependency.** Root `config.allow-plugins` sets it to `false` so Composer installs it without activating it at the repo root.
 
 **`installer-types` is required for non-`library` types to be claimed.** A `type:` pattern in `installer-paths` alone is not enough — the type must also appear in `extra.installer-types` for `LibraryInstaller::supports()` to claim it. Without the list entry, Composer never asks the plugin to install that package at all.
 
