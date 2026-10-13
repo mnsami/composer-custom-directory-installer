@@ -63,7 +63,7 @@ All path logic lives in `PackageUtils::getPackageInstallPath()`. The flow:
    - Pass 1: Exact name match (`"vendor/name"`) — scans all entries first
    - Pass 2: Type prefix match (`"type:library"`) — scans all entries
    - Pass 3: Wildcard glob match (`"vendor/*"`) — scans all entries last; `"vendor:acme"` is rewritten to `"acme/*"` in this pass, so it has the same rank as a glob, not a tier of its own
-5. Substitute `{$...}` variables with `templatePath()`; if a placeholder has a `|flags` suffix (e.g. `{$name|FP}`), apply transformations via `applyFlags()` — `F` = ucfirst, `P` = strip separators + camelCase, `U` = strtoupper. Unknown flags are silently ignored.
+5. Substitute `{$...}` variables with `templatePath()`; if a placeholder has a `|flags` suffix (e.g. `{$name|FP}`), apply transformations via `applyFlags()` — `F` = ucfirst, `P` = strip separators + camelCase, `U` = strtoupper. An unknown variable or flag throws `InvalidArgumentException` naming the placeholder.
 6. Reject resolved paths containing `..` (traversal guard) or starting with `/` or a drive letter (absolute path guard).
 
 ### Namespace
@@ -86,4 +86,4 @@ Tests live in `tests/Unit/` — one file per source class. Protected/private met
 
 **`installer-types` is required for non-`library` types to be claimed.** A `type:` pattern in `installer-paths` alone is not enough — the type must also appear in `extra.installer-types` for `LibraryInstaller::supports()` to claim it. Without the list entry, Composer never asks the plugin to install that package at all.
 
-**Unknown path flags are silently ignored.** `{$name|XZ}` where `X` and `Z` are unrecognised flag characters passes through with the raw value unchanged — no error, no transformation. Typos in flag strings fail silently.
+**Unknown variables and flags throw.** `{$nmae}` and `{$name|XZ}` raise `InvalidArgumentException` from `templatePath()` / `applyFlags()` with the placeholder in the message. They used to resolve to an empty string or pass through unchanged, which sent every matching package into one directory.

@@ -112,6 +112,8 @@ You can use the following variables in your `installer-paths` to build dynamic p
 }
 ```
 
+Every package that matches a multi-package pattern (`type:`, `vendor:`, `acme/*`) must resolve to its own directory, so include `{$name}` (or another distinguishing variable) in such templates. Composer empties a package's target directory before installing into it, and two packages sharing one directory wipe each other on every install. To stop a typo from causing exactly that, an unknown variable such as `{$nmae}` is rejected with an `InvalidArgumentException` instead of resolving to an empty string.
+
 ### Path Variable Flags
 
 You can append transformation flags after a pipe (`|`) to modify how a variable is substituted:
@@ -137,6 +139,8 @@ Flags can be combined. `FP` together produces **PascalCase** (capitalize first +
 | `{$name\|FP}` | `my-package` | `MyPackage` |
 | `{$name\|U}` | `my-package` | `MY-PACKAGE` |
 | `{$vendor\|U}` | `acme` | `ACME` |
+
+Any other flag character is rejected: `{$name|XZ}` throws an `InvalidArgumentException` naming the placeholder.
 
 **Example:**
 
@@ -385,6 +389,10 @@ Troubleshooting
 **`Resolved install path '/tools/foo/' must be a relative path.`** or **`Resolved install path '../modules/foo/' contains '..', which is not allowed.`**
 
 An `installer-paths` template resolved to an absolute path (leading `/` or a Windows drive letter) or climbed out of the project with `..`. Both are rejected by the [path guards](#security). Install paths are relative to the project root: write `tools/{$name}/` rather than `/tools/{$name}/`, and keep targets inside the project rather than `../modules/{$name}/`. If the template itself looks fine, check the package's own `extra.installer-name` — it is substituted for `{$name}` and can carry the offending characters.
+
+**`Unknown variable '{$nmae}' in install path template 'lib/{$nmae}'.`** or **`Unknown flag 'X' in '{$name|XZ}'.`**
+
+A placeholder has a typo. The variables are `{$vendor}`, `{$name}` and `{$type}`; the flags are `F`, `P` and `U` (see [Path Variables](#path-variables)). The plugin refuses to guess, because an unresolved variable would send every matching package to the same directory.
 
 Upgrading to v2.1
 -----------------
