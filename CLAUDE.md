@@ -85,6 +85,10 @@ Two PHPUnit testsuites:
 - `tests/Unit/` — mock-based, one file per source class, plus `ReadmeInstallerPathsTest`, which feeds every `installer-paths` example in the README through the resolver. Protected/private methods in `PackageUtils` are tested via `ReflectionMethod` (see `callProtected()` helper in `PackageUtilsTest`).
 - `tests/Integration/InstallTest.php` — boots a real Composer in a temp project with `Factory::create()` + `Installer`, pulling this checkout and the packages under `tests/Integration/fixtures/` through `path` repositories (Packagist disabled), then asserts where packages land on disk. `composer/installers` is a dev dependency only so the co-install case can reference `vendor/composer/installers` the same way.
 
+### Releases and packaging
+
+`CHANGELOG.md` follows Keep a Changelog. Every user-facing PR adds a line under `[Unreleased]`; a release moves that block under the new version heading, and the same text becomes the GitHub Release notes for the tag. `.gitattributes` `export-ignore` keeps dist archives (GitHub source archives, `composer archive`) to `src/`, `composer.json`, `LICENSE`, `README.md`, `CHANGELOG.md`, `SECURITY.md`; list any new dev-only file there.
+
 ## Gotchas
 
 **Precedence is global across entries, not per-entry.** An exact match in entry 2 beats a wildcard in entry 1. The three-pass algorithm in `mapCustomInstallPaths()` scans all entries for exact matches before considering type or wildcard matches in any entry.

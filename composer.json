@@ -2,12 +2,24 @@
     "name": "mnsami/composer-custom-directory-installer",
     "type": "composer-plugin",
     "description": "A composer plugin, to help install packages of different types in custom paths.",
+    "homepage": "https://github.com/mnsami/composer-custom-directory-installer",
     "license": "MIT",
     "keywords": ["composer", "composer-plugin", "composer-installer", "custom-path", "installer-paths", "wordpress", "drupal", "monorepo"],
     "authors": [
         {
             "name": "Mina Nabil Sami",
             "email": "mina.nsami@gmail.com"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/mnsami/composer-custom-directory-installer/issues",
+        "source": "https://github.com/mnsami/composer-custom-directory-installer",
+        "security": "https://github.com/mnsami/composer-custom-directory-installer/security/policy"
+    },
+    "funding": [
+        {
+            "type": "github",
+            "url": "https://github.com/sponsors/mnsami"
         }
     ],
     "config": {
