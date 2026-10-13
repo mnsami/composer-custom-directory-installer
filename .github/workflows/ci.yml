@@ -17,7 +17,7 @@ jobs:
       matrix:
         php: ['8.1', '8.2', '8.3', '8.4', '8.5']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: php-actions/composer@v6
         with:
           php_version: ${{ matrix.php }}
@@ -36,7 +36,7 @@ jobs:
     name: Composer 2.3 (lowest supported)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # composer/composer 2.3.x carries security advisories and Composer >= 2.9
       # refuses to install advisory-flagged versions. The old Composer is the
       # thing under test here, so allow it for this job only.
@@ -54,7 +54,7 @@ jobs:
     name: Windows (PHP 8.4)
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # php-actions runs Linux containers only, so Windows gets a native PHP from setup-php.
       - uses: shivammathur/setup-php@v2
         with:
@@ -68,7 +68,7 @@ jobs:
     name: php-cs-fixer
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: php-actions/composer@v6
         with:
           php_version: '8.1'
@@ -77,7 +77,7 @@ jobs:
     name: PHPStan
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: php-actions/composer@v6
         with:
           php_version: '8.1'
