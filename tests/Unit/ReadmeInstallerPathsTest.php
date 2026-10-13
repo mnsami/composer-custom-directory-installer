@@ -21,7 +21,8 @@ class ReadmeInstallerPathsTest extends TestCase
      */
     public static function readmeExamples(): iterable
     {
-        $readme = (string) file_get_contents(__DIR__ . '/../../README.md');
+        // Normalise line endings: a Windows checkout may have converted them to CRLF.
+        $readme = str_replace("\r\n", "\n", (string) file_get_contents(__DIR__ . '/../../README.md'));
         preg_match_all('/```json\n(.*?)\n```/s', $readme, $m);
 
         foreach ($m[1] as $i => $block) {

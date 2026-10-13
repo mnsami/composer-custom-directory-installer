@@ -2,8 +2,8 @@
 
 namespace Composer\CustomDirectoryInstaller;
 
-use Composer\Composer;
 use Composer\Package\PackageInterface;
+use Composer\PartialComposer;
 
 /**
  * Utility class for resolving custom installation paths for Composer packages.
@@ -31,11 +31,11 @@ class PackageUtils
      * Supported path variables: {$vendor}, {$name}, {$type}
      *
      * @param PackageInterface $package  The package being installed.
-     * @param Composer         $composer The Composer instance (used to read root extra).
+     * @param PartialComposer  $composer The Composer instance (used to read root extra); installers hold a PartialComposer.
      * @return string|null The resolved install path without a trailing slash, or null if no match found.
      * @throws \InvalidArgumentException If a template uses an unknown variable or flag, or the resolved path contains '..' or is absolute.
      */
-    public static function getPackageInstallPath(PackageInterface $package, Composer $composer): ?string
+    public static function getPackageInstallPath(PackageInterface $package, PartialComposer $composer): ?string
     {
         $prettyName = $package->getPrettyName();
         if (str_contains($prettyName, '/')) {
@@ -49,12 +49,13 @@ class PackageUtils
         $availableVars['type'] = $package->getType();
 
         $extra = $package->getExtra();
-        if (!empty($extra['installer-name'])) {
+        if (!empty($extra['installer-name']) && is_string($extra['installer-name'])) {
             $availableVars['name'] = $extra['installer-name'];
         }
 
         $extra = $composer->getPackage()->getExtra();
         if (!empty($extra['installer-paths']) && is_array($extra['installer-paths'])) {
+            /** @var array<string, mixed[]> $paths JSON objects decode to string keys; values are pattern lists. */
             $paths = array_filter($extra['installer-paths'], 'is_array');
             $customPath = self::mapCustomInstallPaths(
                 $paths,
@@ -180,7 +181,7 @@ class PackageUtils
      *
      * Matching is case-insensitive. Non-string patterns are ignored.
      *
-     * @param  array<string,string[]> $paths The installer-paths map (path => [package names/patterns]).
+     * @param  array<string,mixed[]> $paths The installer-paths map (path => [package names/patterns]).
      * @param  string                 $name  The package pretty name to match.
      * @param  string                 $type  The package type (e.g. "library", "wordpress-plugin").
      * @return string|false The matching path key, or false if none found.

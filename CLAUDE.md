@@ -32,9 +32,14 @@ make format
 
 # Check code style via Docker (dry-run, CI-equivalent)
 docker run --rm -v "$(pwd)":/app -w /app composer-custom-directory-installer vendor/bin/php-cs-fixer fix src --dry-run --diff --config .php-cs-fixer.dist.php
+
+# Static analysis (PHPStan level max on src/, with Composer's phpstan/rules.neon)
+vendor/bin/phpstan analyse
+# or via Docker
+docker run --rm -v "$(pwd)":/app -w /app composer-custom-directory-installer vendor/bin/phpstan analyse
 ```
 
-CI runs `phpunit` (both suites, with Xdebug coverage via `--coverage-text`) + `php-cs-fixer` dry-run against PHP 8.1, 8.2, and 8.3, plus a lowest-Composer job on `composer/composer` 2.3.
+CI runs both phpunit suites on PHP 8.1–8.5 inside `php-actions/phpunit` (the matrix PHP, not the runner's; Xdebug supplies the coverage driver and `coverage_text` prints the report), a `php-cs-fixer` dry-run job and a PHPStan job (both on the runner's PHP with `vendor/` resolved for PHP 8.1, because dependencies resolved for a newer PHP than the runner's can fail to parse), a lowest-Composer job on `composer/composer` 2.3 with PHP 8.1, and a Windows job (native PHP 8.4 via `shivammathur/setup-php`, both suites, exercising the path guards, `fnmatch()` and Composer's junction-based path repositories). PHPStan runs at level max with Composer's `phpstan/rules.neon`. A weekly scheduled run catches upstream breakage; Dependabot watches composer and github-actions.
 
 Available Makefile targets: `composer-install`, `format`, `shell`, `build-docker-image`. There is no `make test` — use the Docker run command above directly.
 
@@ -85,6 +90,8 @@ Two PHPUnit testsuites:
 **Precedence is global across entries, not per-entry.** An exact match in entry 2 beats a wildcard in entry 1. The three-pass algorithm in `mapCustomInstallPaths()` scans all entries for exact matches before considering type or wildcard matches in any entry.
 
 **Matching is case-insensitive.** `mapCustomInstallPaths()` lowercases the package name, the type and every pattern before comparing, because Composer names and types are canonically lowercase. Non-string patterns are dropped rather than compared.
+
+**Composer's installers hold a `PartialComposer`, not a `Composer`.** `PackageUtils::getPackageInstallPath()` accepts `PartialComposer` (which `Composer` extends) so that passing the installer's `$this->composer` type-checks at PHPStan level max.
 
 **`installer-name` affects substitution, not matching.** A package's `extra.installer-name` overrides the `{$name}` variable used in path templates, but pattern matching still uses the original `vendor/name` from `getPrettyName()`. A pattern of `"acme/foo"` will NOT match a package named `acme/bar` even if that package sets `installer-name: foo`.
 
