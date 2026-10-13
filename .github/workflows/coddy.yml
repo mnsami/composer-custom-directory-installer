@@ -18,6 +18,8 @@ permissions:
 jobs:
   check:
     name: closes a claimed issue
+    # Bot PRs (Dependabot and the like) close no issue; the rule is for human and agent work.
+    if: github.event.pull_request.user.type != 'Bot'
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
