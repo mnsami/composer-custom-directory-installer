@@ -32,7 +32,6 @@
     "extra": {
         "class": [
             "Composer\\CustomDirectoryInstaller\\LibraryPlugin",
-            "Composer\\CustomDirectoryInstaller\\PearPlugin",
             "Composer\\CustomDirectoryInstaller\\PluginPlugin"
         ],
         "branch-alias": {
