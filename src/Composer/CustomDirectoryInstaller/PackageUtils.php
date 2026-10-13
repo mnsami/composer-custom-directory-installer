@@ -175,7 +175,8 @@ class PackageUtils
      * Matching precedence (highest to lowest), enforced globally across all entries:
      *  1. Exact package name match (e.g. "vendor/name")
      *  2. Package type prefix match (e.g. "type:library")
-     *  3. Wildcard glob match (e.g. "vendor/*"); "vendor:acme" is an alias of "acme/*" at this rank
+     *  3. Glob match: any pattern containing "*", "?" or "[" is matched with fnmatch()
+     *     (e.g. "vendor/*"); "vendor:acme" is an alias of "acme/*" at this rank
      *
      * Matching is case-insensitive. Non-string patterns are ignored.
      *
@@ -216,7 +217,7 @@ class PackageUtils
                 if (str_starts_with($pattern, 'vendor:')) {
                     $pattern = substr($pattern, 7) . '/*';
                 }
-                if (str_contains($pattern, '*') && fnmatch($pattern, $name)) {
+                if (strpbrk($pattern, '*?[') !== false && fnmatch($pattern, $name)) {
                     return $path;
                 }
             }

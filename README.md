@@ -182,7 +182,7 @@ Matches all packages of a given Composer type using the `type:` prefix:
 
 ### 3. Wildcard vendor glob (lowest precedence)
 
-Matches all packages from a given vendor using `*`:
+Matches all packages from a given vendor using `*`. Patterns are shell-style globs, so `?` and `[...]` work as well; any pattern containing `*`, `?` or `[` is treated as a glob:
 
 ```json
 "installer-paths": {

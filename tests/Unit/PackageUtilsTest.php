@@ -276,6 +276,15 @@ class PackageUtilsTest extends TestCase
         $this->assertSame('vendor', $this->callProtected('mapCustomInstallPaths', [['vendor' => ['Vendor:Acme']], 'acme/foo', '']));
     }
 
+    public function testMapCustomInstallPathsMatchesGlobsWithoutStar(): void
+    {
+        // Any fnmatch metacharacter makes a pattern a glob, not only "*".
+        $paths = ['q' => ['acme/foo?'], 'range' => ['acme/bar[0-9]']];
+        $this->assertSame('q', $this->callProtected('mapCustomInstallPaths', [$paths, 'acme/foo1', '']));
+        $this->assertSame('range', $this->callProtected('mapCustomInstallPaths', [$paths, 'acme/bar7', '']));
+        $this->assertFalse($this->callProtected('mapCustomInstallPaths', [$paths, 'acme/barx', '']));
+    }
+
     public function testMapCustomInstallPathsIgnoresNonStringPatterns(): void
     {
         $paths = ['custom' => [null, 42, 'acme/foo']];
