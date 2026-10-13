@@ -37,7 +37,8 @@
         ],
         "branch-alias": {
             "dev-master": "2.2.x-dev"
-        }
+        },
+        "plugin-modifies-install-path": true
     },
     "require-dev": {
         "composer/composer": "^2.0",
