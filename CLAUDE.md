@@ -39,7 +39,7 @@ vendor/bin/phpstan analyse
 docker run --rm -v "$(pwd)":/app -w /app composer-custom-directory-installer vendor/bin/phpstan analyse
 ```
 
-CI runs both phpunit suites on PHP 8.1–8.5 inside `php-actions/phpunit` (the matrix PHP, not the runner's; Xdebug supplies the coverage driver and `coverage_text` prints the report), `php-cs-fixer` dry-run, a lowest-Composer job on `composer/composer` 2.3 with PHP 8.1, and a PHPStan job at level max with Composer's `phpstan/rules.neon`. A weekly scheduled run catches upstream breakage; Dependabot watches composer and github-actions.
+CI runs both phpunit suites on PHP 8.1–8.5 inside `php-actions/phpunit` (the matrix PHP, not the runner's; Xdebug supplies the coverage driver and `coverage_text` prints the report), `php-cs-fixer` dry-run, a lowest-Composer job on `composer/composer` 2.3 with PHP 8.1, a Windows job (native PHP 8.4 via `shivammathur/setup-php`, both suites, exercising the path guards, `fnmatch()` and Composer's junction-based path repositories), and a PHPStan job at level max with Composer's `phpstan/rules.neon`. A weekly scheduled run catches upstream breakage; Dependabot watches composer and github-actions.
 
 Available Makefile targets: `composer-install`, `format`, `shell`, `build-docker-image`. There is no `make test` — use the Docker run command above directly.
 
