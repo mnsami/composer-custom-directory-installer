@@ -63,10 +63,12 @@ class PackageUtilsTest extends TestCase
         $this->assertSame('lib/foo/bar', $result);
     }
 
-    public function testTemplatePathUnknownVariableBecomesEmptyString(): void
+    public function testTemplatePathThrowsOnUnknownVariable(): void
     {
-        $result = $this->callProtected('templatePath', ['lib/{$unknown}', []]);
-        $this->assertSame('lib/', $result);
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage("Unknown variable '{\$nmae}' in install path template 'lib/{\$nmae}'.");
+
+        $this->callProtected('templatePath', ['lib/{$nmae}', ['name' => 'foo']]);
     }
 
     public function testTemplatePathMultipleDifferentVariables(): void
@@ -81,10 +83,12 @@ class PackageUtilsTest extends TestCase
         $this->assertSame('bar/bar', $result);
     }
 
-    public function testTemplatePathEmptyVarsArray(): void
+    public function testTemplatePathEmptyVarsArrayThrowsOnFirstPlaceholder(): void
     {
-        $result = $this->callProtected('templatePath', ['{$vendor}/{$name}', []]);
-        $this->assertSame('/', $result);
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('{$vendor}');
+
+        $this->callProtected('templatePath', ['{$vendor}/{$name}', []]);
     }
 
     // templatePath() — flags
@@ -125,10 +129,23 @@ class PackageUtilsTest extends TestCase
         $this->assertSame('Mypackage', $result);
     }
 
-    public function testTemplatePathUnknownFlagIsIgnored(): void
+    public function testTemplatePathThrowsOnUnknownFlag(): void
     {
-        $result = $this->callProtected('templatePath', ['{$name|X}', ['name' => 'foo']]);
-        $this->assertSame('foo', $result);
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage("Unknown flag 'X' in '{\$name|XZ}'.");
+
+        $this->callProtected('templatePath', ['{$name|XZ}', ['name' => 'foo']]);
+    }
+
+    public function testGetPackageInstallPathThrowsOnUnknownVariable(): void
+    {
+        $package = $this->makePackage('acme/mylib');
+        $composer = $this->makeComposer(['installer-paths' => ['custom/{$nmae}' => ['acme/mylib']]]);
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('{$nmae}');
+
+        PackageUtils::getPackageInstallPath($package, $composer);
     }
 
     public function testTemplatePathNoFlagBehaviourUnchanged(): void

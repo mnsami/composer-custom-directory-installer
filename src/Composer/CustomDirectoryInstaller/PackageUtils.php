@@ -32,7 +32,7 @@ class PackageUtils
      * @param PackageInterface $package  The package being installed.
      * @param Composer         $composer The Composer instance (used to read root extra).
      * @return string|null The resolved install path, or null if no match found.
-     * @throws \InvalidArgumentException If the resolved path contains '..' or is absolute.
+     * @throws \InvalidArgumentException If a template uses an unknown variable or flag, or the resolved path contains '..' or is absolute.
      */
     public static function getPackageInstallPath(PackageInterface $package, Composer $composer): ?string
     {
@@ -91,22 +91,30 @@ class PackageUtils
     /**
      * Replace {$var} and {$var|flags} placeholders in a path string.
      *
-     * Unknown placeholders are substituted with an empty string.
-     * Optional pipe-separated flags transform the substituted value (see applyFlags()).
+     * A placeholder naming a variable missing from $vars throws, as does an unknown
+     * flag character (see applyFlags()): a typo must not resolve to an empty string
+     * and send several packages into one directory.
      *
      * @param  string               $path The path template, e.g. "lib/{$vendor}/{$name|FP}".
      * @param  array<string,string> $vars Map of variable name to replacement value.
-     * @return string The path with all known placeholders substituted.
+     * @return string The path with all placeholders substituted.
+     * @throws \InvalidArgumentException On an unknown variable or flag.
      */
     protected static function templatePath(string $path, array $vars = []): string
     {
         if (str_contains($path, '{')) {
             $path = (string) preg_replace_callback(
                 '@\{\$([A-Za-z0-9_]+)(?:\|([A-Za-z]*))?\}@',
-                static function (array $m) use ($vars): string {
-                    $value = $vars[$m[1]] ?? '';
+                static function (array $m) use ($vars, $path): string {
+                    if (!array_key_exists($m[1], $vars)) {
+                        throw new \InvalidArgumentException(
+                            sprintf("Unknown variable '%s' in install path template '%s'.", $m[0], $path)
+                        );
+                    }
+
+                    $value = $vars[$m[1]];
                     if (isset($m[2]) && $m[2] !== '') {
-                        $value = self::applyFlags($value, $m[2]);
+                        $value = self::applyFlags($value, $m[2], $m[0]);
                     }
 
                     return $value;
@@ -126,13 +134,15 @@ class PackageUtils
      *  P — pascal/camel: strip hyphens and underscores, capitalize each following word segment
      *  U — strtoupper: uppercase all characters
      *
-     * Unknown flags are silently ignored.
+     * Any other flag character throws.
      *
-     * @param  string $value The value to transform.
-     * @param  string $flags One or more flag characters (e.g. "FP", "U").
+     * @param  string $value       The value to transform.
+     * @param  string $flags       One or more flag characters (e.g. "FP", "U").
+     * @param  string $placeholder The placeholder being resolved, named in the error (e.g. "{$name|FP}").
      * @return string The transformed value.
+     * @throws \InvalidArgumentException On an unknown flag character.
      */
-    protected static function applyFlags(string $value, string $flags): string
+    protected static function applyFlags(string $value, string $flags, string $placeholder): string
     {
         $len = strlen($flags);
         for ($i = 0; $i < $len; $i++) {
@@ -147,6 +157,10 @@ class PackageUtils
                 case 'U':
                     $value = strtoupper($value);
                     break;
+                default:
+                    throw new \InvalidArgumentException(
+                        sprintf("Unknown flag '%s' in '%s'.", $flags[$i], $placeholder)
+                    );
             }
         }
 
