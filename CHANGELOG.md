@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-10-14
+
 ### Added
 - `vendor:acme` in `installer-paths` as an alias of `acme/*`, the spelling used by composer/installers and oomphinc/composer-installers-extender ([#58](https://github.com/mnsami/composer-custom-directory-installer/issues/58)).
 - `?` and `[...]` glob syntax in patterns: any pattern containing `*`, `?` or `[` is matched with `fnmatch()` ([#62](https://github.com/mnsami/composer-custom-directory-installer/issues/62)).
@@ -68,7 +70,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Composer 2 compatibility (`composer-plugin-api ^1.0 || ^2.0`).
 
-[Unreleased]: https://github.com/mnsami/composer-custom-directory-installer/compare/2.2.1...HEAD
+[Unreleased]: https://github.com/mnsami/composer-custom-directory-installer/compare/2.3.0...HEAD
+[2.3.0]: https://github.com/mnsami/composer-custom-directory-installer/compare/2.2.1...2.3.0
 [2.2.1]: https://github.com/mnsami/composer-custom-directory-installer/compare/2.2.0...2.2.1
 [2.2.0]: https://github.com/mnsami/composer-custom-directory-installer/compare/2.1.0...2.2.0
 [2.1.0]: https://github.com/mnsami/composer-custom-directory-installer/compare/2.0.0...2.1.0
