@@ -63,7 +63,7 @@ All path logic lives in `PackageUtils::getPackageInstallPath()`. The flow:
    - Pass 2: Type prefix match (`"type:library"`) — scans all entries
    - Pass 3: Wildcard glob match (`"vendor/*"`) — scans all entries last; `"vendor:acme"` is rewritten to `"acme/*"` in this pass, so it has the same rank as a glob, not a tier of its own
 5. Substitute `{$...}` variables with `templatePath()`; if a placeholder has a `|flags` suffix (e.g. `{$name|FP}`), apply transformations via `applyFlags()` — `F` = ucfirst, `P` = strip separators + camelCase, `U` = strtoupper. An unknown variable or flag throws `InvalidArgumentException` naming the placeholder.
-6. Reject resolved paths containing `..` (traversal guard) or starting with `/` or a drive letter (absolute path guard).
+6. Reject resolved paths containing `..` (traversal guard) or starting with `/`, `\` (which covers UNC `\\server\share`) or a drive letter (absolute path guard). Return the path with its trailing `/` stripped.
 
 ### Namespace
 
@@ -76,6 +76,8 @@ Tests live in `tests/Unit/` — one file per source class. Protected/private met
 ## Gotchas
 
 **Precedence is global across entries, not per-entry.** An exact match in entry 2 beats a wildcard in entry 1. The three-pass algorithm in `mapCustomInstallPaths()` scans all entries for exact matches before considering type or wildcard matches in any entry.
+
+**Matching is case-insensitive.** `mapCustomInstallPaths()` lowercases the package name, the type and every pattern before comparing, because Composer names and types are canonically lowercase. Non-string patterns are dropped rather than compared.
 
 **`installer-name` affects substitution, not matching.** A package's `extra.installer-name` overrides the `{$name}` variable used in path templates, but pattern matching still uses the original `vendor/name` from `getPrettyName()`. A pattern of `"acme/foo"` will NOT match a package named `acme/bar` even if that package sets `installer-name: foo`.
 
