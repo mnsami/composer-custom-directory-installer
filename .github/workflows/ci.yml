@@ -19,3 +19,18 @@ jobs:
           php_version: ${{ matrix.php }}
       - run: vendor/bin/phpunit
       - run: vendor/bin/php-cs-fixer fix src --dry-run --diff --config .php-cs-fixer.dist.php
+  lowest-composer:
+    name: Composer 2.3 (lowest supported)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # composer/composer 2.3.x carries security advisories and Composer >= 2.9
+      # refuses to install advisory-flagged versions. The old Composer is the
+      # thing under test here, so allow it for this job only.
+      - run: composer config policy.advisories.ignore composer/composer
+      - uses: php-actions/composer@v6
+        with:
+          php_version: '8.1'
+          command: require
+          args: composer/composer:2.3.* --dev
+      - run: vendor/bin/phpunit

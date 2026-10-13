@@ -50,7 +50,7 @@ Requirements
 ------------
 
 - PHP >= 8.1
-- Composer 2.x
+- Composer >= 2.3
 
 Installation
 ------------
