@@ -1,0 +1,7 @@
+tracker: github
+repo: mnsami/composer-custom-directory-installer
+worktree: jj
+default_branch: master
+branch: "{type}/issue-{issue}-{slug}"
+commit: "{type}({issue}): {summary}"
+verify: 'docker run --rm -v "$(pwd)":/app -w /app composer-custom-directory-installer vendor/bin/phpunit'
