@@ -212,7 +212,7 @@ By default the plugin handles the `library` package type, and `composer-plugin` 
 }
 ```
 
-The plugin will claim any package whose type appears in `installer-types` and apply the matching `installer-paths` rule. Without this list, packages of any other type are left to Composer's default installer.
+The plugin will claim any package whose type appears in `installer-types` and apply the matching `installer-paths` rule. A single type may also be given as a plain string (`"installer-types": "drupal-module"`). Without this list, packages of any other type are left to Composer's default installer.
 
 Complete example
 ----------------

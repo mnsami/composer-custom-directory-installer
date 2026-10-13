@@ -120,4 +120,38 @@ class LibraryInstallerTest extends TestCase
         $this->assertTrue($installer->supports('drupal-module'));
         $this->assertSame('web/modules/mymodule', $installer->getInstallPath($package));
     }
+
+    public function testSupportsAcceptsStringInstallerTypesAsSingleType(): void
+    {
+        $composer = $this->makeComposer(['installer-types' => 'drupal-module']);
+        $io = $this->createMock(IOInterface::class);
+
+        $installer = new LibraryInstaller($io, $composer);
+
+        $this->assertTrue($installer->supports('drupal-module'));
+        $this->assertFalse($installer->supports('wordpress-plugin'));
+    }
+
+    public function testSupportsIgnoresNullInstallerTypes(): void
+    {
+        $composer = $this->makeComposer(['installer-types' => null]);
+        $io = $this->createMock(IOInterface::class);
+
+        $installer = new LibraryInstaller($io, $composer);
+
+        $this->assertTrue($installer->supports('library'));
+        $this->assertFalse($installer->supports('drupal-module'));
+    }
+
+    public function testSupportsIgnoresScalarNonStringInstallerTypes(): void
+    {
+        $io = $this->createMock(IOInterface::class);
+
+        foreach ([42, true, 1.5] as $value) {
+            $installer = new LibraryInstaller($io, $this->makeComposer(['installer-types' => $value]));
+
+            $this->assertTrue($installer->supports('library'));
+            $this->assertFalse($installer->supports('drupal-module'));
+        }
+    }
 }
