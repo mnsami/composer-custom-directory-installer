@@ -394,6 +394,10 @@ An `installer-paths` template resolved to an absolute path (leading `/` or a Win
 
 A placeholder has a typo. The variables are `{$vendor}`, `{$name}` and `{$type}`; the flags are `F`, `P` and `U` (see [Path Variables](#path-variables)). The plugin refuses to guess, because an unresolved variable would send every matching package to the same directory.
 
+**Two copies of a package after changing its path, or a directory left behind after removing it.**
+
+`installer-paths` only says where a package belongs *now*. When you change a package's path, Composer works out both the old and the new location from the current configuration, finds them identical, and installs a fresh copy at the new path without moving or deleting the old directory. The same happens when a package is removed after its `installer-paths` entry was changed or deleted: Composer looks for it where the current configuration points and leaves the old directory behind. Before running `composer update` after such a change, delete the old directory yourself. If Composer still reports the package as installed at the old location, remove its entry from `vendor/composer/installed.json` as well, or delete `vendor/` and reinstall. Tracked in [#15](https://github.com/mnsami/composer-custom-directory-installer/issues/15) and [#22](https://github.com/mnsami/composer-custom-directory-installer/issues/22).
+
 Upgrading to v2.1
 -----------------
 
