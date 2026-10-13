@@ -13,7 +13,8 @@ class LibraryInstaller extends BaseLibraryInstaller
             return true;
         }
 
-        $installerTypes = $this->composer->getPackage()->getExtra()['installer-types'] ?? [];
+        // A bare string is accepted as a single type; other scalars cast to a list that matches nothing.
+        $installerTypes = (array) ($this->composer->getPackage()->getExtra()['installer-types'] ?? []);
 
         return in_array($packageType, $installerTypes, true);
     }
